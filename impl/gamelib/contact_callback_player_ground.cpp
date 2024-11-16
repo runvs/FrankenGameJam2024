@@ -1,8 +1,6 @@
-
 #include "contact_callback_player_ground.hpp"
 #include <user_data_entries.hpp>
 #include <Box2D/Dynamics/Contacts/b2Contact.h>
-#include <iostream>
 
 void ContactCallbackPlayerGround::onBeginContact(b2Contact* contact)
 {
@@ -33,11 +31,16 @@ void ContactCallbackPlayerGround::onEndContact(b2Contact* contact)
     }
     p->setTouchesGround(m_numberOfFeetContacts >= 1);
 }
+
 void ContactCallbackPlayerGround::setPlayer(std::weak_ptr<Player> player) { m_player = player; }
+
 bool ContactCallbackPlayerGround::isPlayerFeetFixture(b2Fixture* fa) const
 {
     void* fixtureUserData = fa->GetUserData();
-    return (std::uint64_t)fixtureUserData == g_userDataPlayerFeetID;
+    return (std::uint64_t)fixtureUserData
+        == g_userDataPlayerFeetID + m_player.lock()->getPlayerId();
 }
+
 void ContactCallbackPlayerGround::setEnabled(bool enabled) { m_enabled = enabled; }
+
 bool ContactCallbackPlayerGround::getEnabled() const { return true; }

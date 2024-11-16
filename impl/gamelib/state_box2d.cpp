@@ -25,20 +25,20 @@ void StatePlatformer::onCreate()
     loadLevel();
 
     CreatePlayer();
+    auto const playerGroundContactListener0 = std::make_shared<ContactCallbackPlayerGround>();
+    playerGroundContactListener0->setPlayer(m_player0);
+    m_world->getContactManager().registerCallback("player_ground0", playerGroundContactListener0);
+
     auto const playerGroundContactListener1 = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener1->setPlayer(m_player1);
     m_world->getContactManager().registerCallback("player_ground1", playerGroundContactListener1);
 
-    auto const playerGroundContactListener2 = std::make_shared<ContactCallbackPlayerGround>();
-    playerGroundContactListener2->setPlayer(m_player2);
-    m_world->getContactManager().registerCallback("player_ground2", playerGroundContactListener2);
-
     auto playerEnemyContactListener1 = std::make_shared<ContactCallbackPlayerEnemy>();
-    playerEnemyContactListener1->setPlayer(m_player1);
+    playerEnemyContactListener1->setPlayer(m_player0);
     m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener1);
 
     auto playerEnemyContactListener2 = std::make_shared<ContactCallbackPlayerEnemy>();
-    playerEnemyContactListener2->setPlayer(m_player2);
+    playerEnemyContactListener2->setPlayer(m_player1);
     m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener2);
 
     m_vignette = std::make_shared<jt::Vignette>(GP::GetScreenSize());
@@ -62,12 +62,12 @@ void StatePlatformer::onUpdate(float const elapsed)
         m_world->step(elapsed, velocityIterations, positionIterations);
 
         // TODO death condition for player 2
-        if (!m_player1->isAlive()) {
+        if (!m_player0->isAlive()) {
             endGame();
         }
-        m_level->checkIfPlayerIsInKillbox(m_player1->getPosition(), [this]() { endGame(); });
+        m_level->checkIfPlayerIsInKillbox(m_player0->getPosition(), [this]() { endGame(); });
         m_level->checkIfPlayerIsInExit(
-            m_player1->getPosition(), [this](std::string const& newLevelName) {
+            m_player0->getPosition(), [this](std::string const& newLevelName) {
                 if (!m_ending) {
                     m_ending = true;
                     getGame()->stateManager().switchState(
@@ -112,8 +112,8 @@ void StatePlatformer::endGame()
 void StatePlatformer::handleCameraScrolling(float const elapsed)
 {
     // TODO add y scrolling if needed
-    auto const ps1 = m_player1->getPosOnScreen();
-    auto const ps2 = m_player2->getPosOnScreen();
+    auto const ps1 = m_player0->getPosOnScreen();
+    auto const ps2 = m_player1->getPosOnScreen();
 
     auto const ps = 0.5f * (ps1 + ps2);
 
@@ -182,8 +182,8 @@ void StatePlatformer::onDraw() const
 {
     m_level->draw();
 
+    m_player0->draw();
     m_player1->draw();
-    m_player2->draw();
     m_walkParticles->draw();
     m_playerJumpParticles->draw();
     m_vignette->draw();
@@ -191,15 +191,17 @@ void StatePlatformer::onDraw() const
 
 void StatePlatformer::CreatePlayer()
 {
-    m_player1 = std::make_shared<Player>(m_world);
-    m_player1->setPosition(m_level->getPlayerStart());
-    m_player1->setLevelSize(m_level->getLevelSizeInPixel());
-    add(m_player1);
+    m_player0 = std::make_shared<Player>(m_world);
+    m_player0->setPosition(m_level->getPlayerStart());
+    m_player0->setLevelSize(m_level->getLevelSizeInPixel());
+    m_player0->setPlayerId(0);
+    add(m_player0);
 
-    m_player2 = std::make_shared<Player>(m_world);
-    m_player2->setPosition(m_level->getPlayerStart() + jt::Vector2f { 10.0f, 0.0f });
-    m_player2->setLevelSize(m_level->getLevelSizeInPixel());
-    add(m_player2);
+    m_player1 = std::make_shared<Player>(m_world);
+    m_player1->setPosition(m_level->getPlayerStart() + jt::Vector2f { 10.0f, 0.0f });
+    m_player1->setLevelSize(m_level->getLevelSizeInPixel());
+    m_player1->setPlayerId(1);
+    add(m_player1);
 
     getGame()->gfx().camera().setCamOffset(m_level->getPlayerStart() - GP::GetScreenSize() * 0.5f);
 
@@ -248,8 +250,8 @@ void StatePlatformer::createPlayerJumpParticleSystem()
             add(twr);
         });
     add(m_playerJumpParticles);
+    m_player0->setJumpParticleSystem(m_playerJumpParticles);
     m_player1->setJumpParticleSystem(m_playerJumpParticles);
-    m_player2->setJumpParticleSystem(m_playerJumpParticles);
 }
 
 void StatePlatformer::createPlayerWalkParticles()
@@ -292,8 +294,8 @@ void StatePlatformer::createPlayerWalkParticles()
             });
         });
     add(m_walkParticles);
+    m_player0->setWalkParticleSystem(m_walkParticles);
     m_player1->setWalkParticleSystem(m_walkParticles);
-    m_player2->setWalkParticleSystem(m_walkParticles);
 }
 
 std::string StatePlatformer::getName() const { return "Box2D"; }

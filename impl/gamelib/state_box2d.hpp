@@ -24,8 +24,8 @@ private:
     std::string m_levelName { "" };
 
     std::shared_ptr<Level> m_level { nullptr };
+    std::shared_ptr<Player> m_player0 { nullptr };
     std::shared_ptr<Player> m_player1 { nullptr };
-    std::shared_ptr<Player> m_player2 { nullptr };
     std::shared_ptr<jt::Vignette> m_vignette { nullptr };
 
     std::shared_ptr<jt::ParticleSystem<jt::Shape, 50>> m_walkParticles { nullptr };

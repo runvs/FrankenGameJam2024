@@ -73,7 +73,7 @@ void Player::doUpdate(float const elapsed)
     polygonShape.SetAsBox(halfAxis.x, halfAxis.y, jt::Conversion::vec(center), 0);
     fixtureDef.shape = &polygonShape;
     m_footSensorFixture = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
-    m_footSensorFixture->SetUserData((void*)g_userDataPlayerFeetID);
+    m_footSensorFixture->SetUserData((void*)g_userDataPlayerFeetID + m_playerId);
 
     auto currentPosition = m_physicsObject->getPosition();
     clampPositionToLevelSize(currentPosition);
@@ -283,6 +283,10 @@ void Player::setLevelSize(jt::Vector2f const& levelSizeInTiles)
 {
     m_levelSizeInTiles = levelSizeInTiles;
 }
+
+void Player::setPlayerId(int playerId) { m_playerId = playerId; }
+
+int Player::getPlayerId() const { return m_playerId; }
 
 bool Player::canJump() const
 {

@@ -30,6 +30,8 @@ public:
     void setJumpParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps);
 
     void setLevelSize(jt::Vector2f const& levelSizeInTiles);
+    void setPlayerId(int playerId);
+    int getPlayerId() const;
 
 private:
     std::shared_ptr<jt::Animation> m_animation;
@@ -63,6 +65,8 @@ private:
     void clampPositionToLevelSize(jt::Vector2f& currentPosition) const;
     bool m_horizontalMovement { false };
     std::shared_ptr<jt::Line> m_gravityGizmo;
+
+    int m_playerId { 0 };
 };
 
 #endif // JAMTEMPLATE_DEMO_PLATFORM_PLAYER
