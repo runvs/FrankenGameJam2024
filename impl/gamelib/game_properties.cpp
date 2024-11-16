@@ -28,6 +28,7 @@ jt::Palette createPalette()
 jt::Palette GP::getPalette()
 {
     static auto const p = createPalette();
+
     return p;
 }
 
