@@ -162,7 +162,6 @@ void Level::loadLevelSettings(jt::tilemap::TilesonLoader& loader)
 {
     auto settings = loader.loadObjectsFromLayer("settings");
     for (auto const& info : settings) {
-
         if (info.name == "map_settings") {
             m_background->setColor(
                 jt::Color { static_cast<uint8_t>(info.properties.ints.at("bg_r")),
