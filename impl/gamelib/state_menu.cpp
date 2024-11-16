@@ -90,7 +90,7 @@ void StateMenu::createTextStart()
 {
     auto const half_width = GP::GetScreenSize().x / 2.0f;
     m_textStart = jt::dh::createText(
-        renderTarget(), "Press Space to start the game", 16u, GP::PaletteFontFront());
+        renderTarget(), "Press Start or Space to start the game", 16u, GP::PaletteFontFront());
     m_textStart->setPosition({ half_width, 70 });
     m_textStart->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 2, 2 });
 }
@@ -204,7 +204,9 @@ void StateMenu::checkForTransitionToStateGame()
     auto const keysToTriggerTransition = { jt::KeyCode::Space, jt::KeyCode::Enter };
 
     if (std::any_of(std::begin(keysToTriggerTransition), std::end(keysToTriggerTransition),
-            [this](auto const k) { return getGame()->input().keyboard()->justPressed(k); })) {
+            [this](auto const k) { return getGame()->input().keyboard()->justPressed(k); })
+        || getGame()->input().gamepad(0)->justPressed(jt::GamepadButtonCode::GBStart)
+        || getGame()->input().gamepad(1)->justPressed(jt::GamepadButtonCode::GBStart)) {
         startTransitionToStateGame();
     }
 }

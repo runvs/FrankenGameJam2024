@@ -78,26 +78,10 @@ void StatePlatformer::onUpdate(float const elapsed)
         handleCameraScrolling(elapsed);
     }
     if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F1)
-        || getGame()->input().keyboard()->justPressed(jt::KeyCode::Escape)) {
-
+        || getGame()->input().keyboard()->justPressed(jt::KeyCode::Escape)
+        || getGame()->input().gamepad(0)->justPressed(jt::GamepadButtonCode::GBBack)
+        || getGame()->input().gamepad(1)->justPressed(jt::GamepadButtonCode::GBBack)) {
         getGame()->stateManager().switchState(std::make_shared<StateMenu>());
-    }
-
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F2)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_2.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F3)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_3.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F5)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_5.json"));
-    }
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::F6)) {
-        getGame()->stateManager().switchState(
-            std::make_shared<StatePlatformer>("platformer_0_6.json"));
     }
 }
 

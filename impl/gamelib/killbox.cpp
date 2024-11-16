@@ -24,12 +24,14 @@ void Killbox::doCreate()
             textureManager());
     }
 }
+
 void Killbox::doUpdate(float const elapsed)
 {
     if (m_drawable) {
         m_drawable->update(elapsed);
     }
 }
+
 void Killbox::doDraw() const
 {
     if (m_drawable) {
@@ -54,7 +56,9 @@ void Killbox::checkIfPlayerIsInKillbox(
         callback();
     }
 }
+
 std::string Killbox::getName() const { return m_name; }
+
 jt::Vector2f Killbox::getPosition() const { return jt::Vector2f { m_rect.left, m_rect.top }; }
 
 void Killbox::setPosition(jt::Vector2f const& pos)
