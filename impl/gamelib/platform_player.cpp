@@ -51,7 +51,7 @@ void Player::updateGravity(jt::Vector2f const& currentPosition)
     m_gravityGizmo->setPosition(currentPosition);
     m_gravityGizmo->update(0.0f);
 
-    constexpr auto gravityStrength = 400.0f;
+    constexpr auto gravityStrength = 10000.0f;
     m_physicsObject->getB2Body()->ApplyForceToCenter(
         { m_gravityDirection.x * gravityStrength, m_gravityDirection.y * gravityStrength }, true);
 }
@@ -140,6 +140,8 @@ void Player::handleMovement(float const elapsed)
     m_horizontalMovement = false;
 
     auto degreesToHorizontalRotation = jt::MathHelper::angleOf(m_gravityDirection) + 90.0f;
+    auto localRightAxis = jt::MathHelper::rotateBy(m_gravityDirection, -90.0f);
+
     auto v_rotated
         = jt::MathHelper::rotateBy(m_physicsObject->getVelocity(), degreesToHorizontalRotation);
     constexpr auto gamepadId = 0;
@@ -152,16 +154,12 @@ void Player::handleMovement(float const elapsed)
         inputAxis.x -= 1;
     }
     if (getGame()->input().keyboard()->pressed(jt::KeyCode::W)) {
-        inputAxis.y += 1;
-    }
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::S)) {
         inputAxis.y -= 1;
     }
+    if (getGame()->input().keyboard()->pressed(jt::KeyCode::S)) {
+        inputAxis.y += 1;
+    }
     jt::MathHelper::normalizeMe(inputAxis);
-
-    // TODO: probably need to rotate input axis as well before continuing but this will be a fun
-    //       looking bug
-
     if (inputAxis.x > 0) {
         if (v_rotated.x < 0) {
             v_rotated.x *= 0.9f;
@@ -169,26 +167,25 @@ void Player::handleMovement(float const elapsed)
         m_horizontalMovement = true;
     }
 
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::A)) {
+    if (inputAxis.x < 0) {
         if (v_rotated.x > 0) {
             v_rotated.x *= 0.9f;
         }
         m_horizontalMovement = true;
     }
 
-    auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
     auto constexpr inputDeadZone = 0.2;
     if (jt::MathHelper::length(inputAxis) > inputDeadZone) {
-        // TODO only apply force on horizontal player axis
-        auto const rotated_inputAxis
-            = jt::MathHelper::rotateBy(inputAxis, -degreesToHorizontalRotation);
+        auto movement_strength = jt::MathHelper::dot(inputAxis, localRightAxis);
 
         b2b->ApplyForceToCenter(
-            b2Vec2 { inputAxis.x * horizontalAcceleration, inputAxis.y * horizontalAcceleration },
+            b2Vec2 { localRightAxis.x * movement_strength * horizontalAcceleration,
+                localRightAxis.y * movement_strength * horizontalAcceleration },
             true);
     }
 
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::W)) {
+    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::Space)
+        || getGame()->input().gamepad(gamepadId)->justPressed(jt::GamepadButtonCode::GBA)) {
         if (m_wantsToJumpTimer <= 0.0f) {
             m_wantsToJumpTimer = preLandJumpTimeFrame;
         }
@@ -204,38 +201,38 @@ void Player::handleMovement(float const elapsed)
 
     // Jump
     if (getGame()->input().keyboard()->pressed(jt::KeyCode::Space)
-        || getGame()->input().gamepad(gamepadId)->justPressed(jt::GamepadButtonCode::GBA)) {
+        || getGame()->input().gamepad(gamepadId)->pressed(jt::GamepadButtonCode::GBA)) {
         if (v_rotated.y < 0) {
             b2b->ApplyForceToCenter(b2Vec2 { -m_gravityDirection.x, -m_gravityDirection.y }, true);
         }
     }
 
-    // TODO
-    // if (v.y >= maxVerticalVelocity) {
-    //     v.y = maxVerticalVelocity;
-    // }
-    // // clamp horizontal Velocity
-    // if (v.x >= maxHorizontalVelocity) {
-    //     v.x = maxHorizontalVelocity;
-    // } else if (v.x <= -maxHorizontalVelocity) {
-    //     v.x = -maxHorizontalVelocity;
-    // }
-    //
-    // // damp horizontal movement
-    // if (!m_horizontalMovement) {
-    //     if (v.x > 0) {
-    //         v.x -= horizontalDampening * elapsed;
-    //         if (v.x < 0) {
-    //             v.x = 0;
-    //         }
-    //     } else if (v.x < 0) {
-    //         v.x += horizontalDampening * elapsed;
-    //         if (v.x > 0) {
-    //             v.x = 0;
-    //         }
-    //     }
-    // }
+    if (v_rotated.y >= maxVerticalVelocity) {
+        v_rotated.y = maxVerticalVelocity;
+    }
+    // clamp horizontal Velocity
+    if (v_rotated.x >= maxHorizontalVelocity) {
+        v_rotated.x = maxHorizontalVelocity;
+    } else if (v_rotated.x <= -maxHorizontalVelocity) {
+        v_rotated.x = -maxHorizontalVelocity;
+    }
 
+    // damp horizontal movement
+    if (!m_horizontalMovement) {
+        if (v_rotated.x > 0) {
+            v_rotated.x -= horizontalDampening * elapsed;
+            if (v_rotated.x < 0) {
+                v_rotated.x = 0;
+            }
+        } else if (v_rotated.x < 0) {
+            v_rotated.x += horizontalDampening * elapsed;
+            if (v_rotated.x > 0) {
+                v_rotated.x = 0;
+            }
+        }
+    }
+
+    auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
     m_physicsObject->setVelocity(v);
 }
 
