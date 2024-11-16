@@ -103,12 +103,15 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     // TODO add y scrolling if needed
     auto ps = m_player->getPosOnScreen();
 
+    float const topMargin = 150.0f;
+    float const botMargin = 150.0f;
     float const rightMargin = 150.0f;
     float const leftMargin = 150.0f;
     float const scrollSpeed = 60.0f;
     auto& cam = getGame()->gfx().camera();
 
     auto const screenWidth = 400.0f;
+    auto const screenHeight = 300.0f;
     if (ps.x < leftMargin) {
         cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
         if (ps.x < rightMargin / 2) {
@@ -121,15 +124,35 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
         }
     }
 
+    if (ps.y < topMargin) {
+        cam.move(jt::Vector2f { 0.0f, -scrollSpeed * elapsed});
+        if (ps.y < rightMargin / 2) {
+            cam.move(jt::Vector2f { 0.0f, -scrollSpeed * elapsed });
+        }
+    } else if (ps.y > screenHeight - botMargin) {
+        cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed});
+        if (ps.y > screenWidth - rightMargin / 3 * 2) {
+            cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed});
+        }
+    }
+
     // clamp camera to level bounds
     auto offset = cam.getCamOffset();
     if (offset.x < 0) {
         offset.x = 0;
     }
+    if (offset.y < 0) {
+        offset.y = 0;
+    }
     auto const levelWidth = m_level->getLevelSizeInPixel().x;
-    auto const maxCamPosition = levelWidth - screenWidth;
-    if (offset.x > maxCamPosition) {
-        offset.x = maxCamPosition;
+    auto const levelHeight = m_level->getLevelSizeInPixel().y;
+    auto const maxCamPositionX = levelWidth - screenWidth;
+    auto const maxCamPositionY = levelHeight - screenHeight;
+    if (offset.x > maxCamPositionX) {
+        offset.x = maxCamPositionX;
+    }
+    if (offset.y > maxCamPositionY) {
+        offset.y = maxCamPositionY;
     }
     cam.setCamOffset(offset);
 }
