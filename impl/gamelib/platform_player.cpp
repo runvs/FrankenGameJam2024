@@ -177,19 +177,13 @@ void Player::handleMovement(float const elapsed)
         inputAxis.y += 1;
     }
     jt::MathHelper::normalizeMe(inputAxis);
-    if (inputAxis.x > 0) {
-        if (v_rotated.x < 0) {
-            v_rotated.x *= 0.9f;
-        }
-        m_horizontalMovement = true;
-    }
-
-    if (inputAxis.x < 0) {
-        if (v_rotated.x > 0) {
-            v_rotated.x *= 0.9f;
-        }
-        m_horizontalMovement = true;
-    }
+    // if (inputAxis.x > 0) {
+    //     m_horizontalMovement = true;
+    // }
+    //
+    // if (inputAxis.x < 0) {
+    //     m_horizontalMovement = true;
+    // }
 
     auto constexpr inputDeadZone = 0.2;
     if (jt::MathHelper::length(inputAxis) > inputDeadZone) {
@@ -234,20 +228,20 @@ void Player::handleMovement(float const elapsed)
         v_rotated.x = -maxHorizontalVelocity;
     }
 
-    // damp horizontal movement
-    if (!m_horizontalMovement) {
-        if (v_rotated.x > 0) {
-            v_rotated.x -= horizontalDampening * elapsed;
-            if (v_rotated.x < 0) {
-                v_rotated.x = 0;
-            }
-        } else if (v_rotated.x < 0) {
-            v_rotated.x += horizontalDampening * elapsed;
-            if (v_rotated.x > 0) {
-                v_rotated.x = 0;
-            }
-        }
-    }
+    // // damp horizontal movement
+    // if (!m_horizontalMovement) {
+    //     if (v_rotated.x > 0) {
+    //         v_rotated.x -= horizontalDampening * elapsed;
+    //         if (v_rotated.x < 0) {
+    //             v_rotated.x = 0;
+    //         }
+    //     } else if (v_rotated.x < 0) {
+    //         v_rotated.x += horizontalDampening * elapsed;
+    //         if (v_rotated.x > 0) {
+    //             v_rotated.x = 0;
+    //         }
+    //     }
+    // }
 
     auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
     m_physicsObject->setVelocity(v);

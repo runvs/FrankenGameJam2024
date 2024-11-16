@@ -113,14 +113,15 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 {
     // TODO add y scrolling if needed
     auto const ps1 = m_player1->getPosOnScreen();
-    auto const ps2 = m_player1->getPosOnScreen();
+    auto const ps2 = m_player2->getPosOnScreen();
 
     auto const ps = 0.5f * (ps1 + ps2);
+    std::cout << "1 " << ps1 << "\t2 " << ps2 << "\tps: " << ps << std::endl;
 
     float const topMargin = 100.0f;
     float const botMargin = 100.0f;
-    float const rightMargin = 150.0f;
-    float const leftMargin = 150.0f;
+    float const rightMargin = 120.0f;
+    float const leftMargin = 120.0f;
 
     auto& cam = getGame()->gfx().camera();
 
@@ -131,8 +132,8 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     //    std::cout << dist << " " << dif.x << " " << dif.y << std::endl;
     float const scrollSpeed = 200.0f;
 
-    auto const screenWidth = 400.0f;
-    auto const screenHeight = 300.0f;
+    auto const screenWidth = GP::GetScreenSize().x;
+    auto const screenHeight = GP::GetScreenSize().y;
     if (ps.x < leftMargin) {
         cam.move(jt::Vector2f { -scrollSpeed * elapsed, 0.0f });
         if (ps.x < rightMargin / 2) {
