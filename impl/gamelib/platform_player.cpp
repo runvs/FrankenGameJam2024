@@ -1,7 +1,9 @@
 #include "platform_player.hpp"
-#include <user_data_entries.hpp>
+
+#include "line.hpp"
 #include <game_interface.hpp>
 #include <math_helper.hpp>
+#include <user_data_entries.hpp>
 
 Player::Player(std::shared_ptr<jt::Box2DWorldInterface> world)
 {
@@ -37,6 +39,23 @@ void Player::doCreate()
     footSensorFixture->SetUserData((void*)g_userDataPlayerFeetID);
 }
 
+void Player::updateGravity(jt::Vector2f const& currentPosition)
+{
+    constexpr auto worldOffset = jt::Vector2f { 100.0, 100.0 } * 8;
+
+    m_gravityDirection = currentPosition - worldOffset;
+    jt::MathHelper::normalizeMe(m_gravityDirection);
+    m_gravityDirection *= -1;
+
+    m_gravityGizmo = std::make_shared<jt::Line>(m_gravityDirection * 400);
+    m_gravityGizmo->setPosition(currentPosition);
+    m_gravityGizmo->update(0.0f);
+
+    constexpr auto gravityStrength = 400.0f;
+    m_physicsObject->getB2Body()->ApplyForceToCenter(
+        { m_gravityDirection.x * gravityStrength, m_gravityDirection.y * gravityStrength }, true);
+}
+
 std::shared_ptr<jt::Animation> Player::getAnimation() { return m_animation; }
 
 void Player::doUpdate(float const elapsed)
@@ -45,6 +64,7 @@ void Player::doUpdate(float const elapsed)
     clampPositionToLevelSize(currentPosition);
     m_physicsObject->setPosition(currentPosition);
     m_animation->setPosition(currentPosition);
+    updateGravity(currentPosition);
     updateAnimation(elapsed);
     handleMovement(elapsed);
 
@@ -119,21 +139,53 @@ void Player::handleMovement(float const elapsed)
 
     m_horizontalMovement = false;
 
-    auto v = m_physicsObject->getVelocity();
+    auto degreesToHorizontalRotation = jt::MathHelper::angleOf(m_gravityDirection) + 90.0f;
+    auto v_rotated
+        = jt::MathHelper::rotateBy(m_physicsObject->getVelocity(), degreesToHorizontalRotation);
+    constexpr auto gamepadId = 0;
+
+    auto inputAxis = getGame()->input().gamepad(gamepadId)->getAxis(jt::GamepadAxisCode::ALeft);
     if (getGame()->input().keyboard()->pressed(jt::KeyCode::D)) {
-        if (v.x < 0) {
-            v.x *= 0.9f;
+        inputAxis.x += 1;
+    }
+    if (getGame()->input().keyboard()->pressed(jt::KeyCode::A)) {
+        inputAxis.x -= 1;
+    }
+    if (getGame()->input().keyboard()->pressed(jt::KeyCode::W)) {
+        inputAxis.y += 1;
+    }
+    if (getGame()->input().keyboard()->pressed(jt::KeyCode::S)) {
+        inputAxis.y -= 1;
+    }
+    jt::MathHelper::normalizeMe(inputAxis);
+
+    // TODO: probably need to rotate input axis as well before continuing but this will be a fun
+    //       looking bug
+
+    if (inputAxis.x > 0) {
+        if (v_rotated.x < 0) {
+            v_rotated.x *= 0.9f;
         }
-        b2b->ApplyForceToCenter(b2Vec2 { horizontalAcceleration, 0 }, true);
         m_horizontalMovement = true;
     }
 
     if (getGame()->input().keyboard()->pressed(jt::KeyCode::A)) {
-        if (v.x > 0) {
-            v.x *= 0.9f;
+        if (v_rotated.x > 0) {
+            v_rotated.x *= 0.9f;
         }
-        b2b->ApplyForceToCenter(b2Vec2 { -horizontalAcceleration, 0 }, true);
         m_horizontalMovement = true;
+    }
+
+    auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
+    auto constexpr inputDeadZone = 0.2;
+    if (jt::MathHelper::length(inputAxis) > inputDeadZone) {
+        // TODO only apply force on horizontal player axis
+        auto const rotated_inputAxis
+            = jt::MathHelper::rotateBy(inputAxis, -degreesToHorizontalRotation);
+
+        b2b->ApplyForceToCenter(
+            b2Vec2 { inputAxis.x * horizontalAcceleration, inputAxis.y * horizontalAcceleration },
+            true);
     }
 
     if (getGame()->input().keyboard()->justPressed(jt::KeyCode::W)) {
@@ -146,46 +198,54 @@ void Player::handleMovement(float const elapsed)
         if (canJump()) {
 
             m_lastJumpTimer = jumpDeadTime;
-            v.y = jumpInitialVelocity;
+            v_rotated.y = jumpInitialVelocity;
         }
     }
 
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::W)) {
-        if (v.y < 0) {
-            b2b->ApplyForceToCenter(b2Vec2 { 0, jumpVerticalAcceleration }, true);
+    // Jump
+    if (getGame()->input().keyboard()->pressed(jt::KeyCode::Space)
+        || getGame()->input().gamepad(gamepadId)->justPressed(jt::GamepadButtonCode::GBA)) {
+        if (v_rotated.y < 0) {
+            b2b->ApplyForceToCenter(b2Vec2 { -m_gravityDirection.x, -m_gravityDirection.y }, true);
         }
     }
 
-    if (v.y >= maxVerticalVelocity) {
-        v.y = maxVerticalVelocity;
-    }
-    // clamp horizontal Velocity
-    if (v.x >= maxHorizontalVelocity) {
-        v.x = maxHorizontalVelocity;
-    } else if (v.x <= -maxHorizontalVelocity) {
-        v.x = -maxHorizontalVelocity;
-    }
-
-    // damp horizontal movement
-    if (!m_horizontalMovement) {
-        if (v.x > 0) {
-            v.x -= horizontalDampening * elapsed;
-            if (v.x < 0) {
-                v.x = 0;
-            }
-        } else if (v.x < 0) {
-            v.x += horizontalDampening * elapsed;
-            if (v.x > 0) {
-                v.x = 0;
-            }
-        }
-    }
+    // TODO
+    // if (v.y >= maxVerticalVelocity) {
+    //     v.y = maxVerticalVelocity;
+    // }
+    // // clamp horizontal Velocity
+    // if (v.x >= maxHorizontalVelocity) {
+    //     v.x = maxHorizontalVelocity;
+    // } else if (v.x <= -maxHorizontalVelocity) {
+    //     v.x = -maxHorizontalVelocity;
+    // }
+    //
+    // // damp horizontal movement
+    // if (!m_horizontalMovement) {
+    //     if (v.x > 0) {
+    //         v.x -= horizontalDampening * elapsed;
+    //         if (v.x < 0) {
+    //             v.x = 0;
+    //         }
+    //     } else if (v.x < 0) {
+    //         v.x += horizontalDampening * elapsed;
+    //         if (v.x > 0) {
+    //             v.x = 0;
+    //         }
+    //     }
+    // }
 
     m_physicsObject->setVelocity(v);
 }
+
 b2Body* Player::getB2Body() { return m_physicsObject->getB2Body(); }
 
-void Player::doDraw() const { m_animation->draw(renderTarget()); }
+void Player::doDraw() const
+{
+    m_animation->draw(renderTarget());
+    m_gravityGizmo->draw(renderTarget());
+}
 
 void Player::setTouchesGround(bool touchingGround)
 {

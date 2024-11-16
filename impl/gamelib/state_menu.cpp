@@ -9,7 +9,6 @@
 #include <log/license_info.hpp>
 #include <screeneffects/vignette.hpp>
 #include <state_box2d.hpp>
-#include <state_game.hpp>
 #include <state_manager/state_manager_transition_fade_to_black.hpp>
 #include <text.hpp>
 #include <tweens/tween_alpha.hpp>

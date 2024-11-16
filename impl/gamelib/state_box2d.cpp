@@ -19,8 +19,8 @@ void StatePlatformer::onCreate()
     auto contactManager = std::make_shared<jt::Box2DContactManager>();
     auto loggingContactManager
         = std::make_shared<jt::LoggingBox2DContactManager>(contactManager, getGame()->logger());
-    m_world = std::make_shared<jt::Box2DWorldImpl>(
-        jt::Vector2f { 0.0f, 400.0f }, loggingContactManager);
+    m_world
+        = std::make_shared<jt::Box2DWorldImpl>(jt::Vector2f { 0.0f, 0.0f }, loggingContactManager);
 
     loadLevel();
 
