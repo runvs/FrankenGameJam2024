@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-set(PROJECTNAME "JamTemplate")
+set(PROJECTNAME "RoundRunner")
 project(${PROJECTNAME})
 
 ### Enable CCache
@@ -93,7 +93,6 @@ jt_setup_fmod()
 
 
 add_subdirectory(impl)
-add_subdirectory(test)
 
 ## copy .clang-format to build directory
 #####################################################
