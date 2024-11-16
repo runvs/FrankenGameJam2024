@@ -160,9 +160,8 @@ void Player::handleMovement(float const elapsed)
 
     auto v_rotated
         = jt::MathHelper::rotateBy(m_physicsObject->getVelocity(), degreesToHorizontalRotation);
-    constexpr auto gamepadId = 0;
 
-    auto inputAxis = getGame()->input().gamepad(gamepadId)->getAxis(jt::GamepadAxisCode::ALeft);
+    auto inputAxis = getGame()->input().gamepad(m_playerId)->getAxis(jt::GamepadAxisCode::ALeft);
     if (getGame()->input().keyboard()->pressed(jt::KeyCode::D)) {
         inputAxis.x += 1;
     }
@@ -195,7 +194,7 @@ void Player::handleMovement(float const elapsed)
     }
 
     if (getGame()->input().keyboard()->justPressed(jt::KeyCode::Space)
-        || getGame()->input().gamepad(gamepadId)->justPressed(jt::GamepadButtonCode::GBA)) {
+        || getGame()->input().gamepad(m_playerId)->justPressed(jt::GamepadButtonCode::GBA)) {
         if (m_wantsToJumpTimer <= 0.0f) {
             m_wantsToJumpTimer = preLandJumpTimeFrame;
         }
@@ -211,7 +210,7 @@ void Player::handleMovement(float const elapsed)
 
     // Jump
     if (getGame()->input().keyboard()->pressed(jt::KeyCode::Space)
-        || getGame()->input().gamepad(gamepadId)->pressed(jt::GamepadButtonCode::GBA)) {
+        || getGame()->input().gamepad(m_playerId)->pressed(jt::GamepadButtonCode::GBA)) {
         if (v_rotated.y < 0) {
             b2b->ApplyForceToCenter(b2Vec2 { -m_gravityDirection.x, -m_gravityDirection.y }, true);
         }
