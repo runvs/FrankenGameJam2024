@@ -1,14 +1,14 @@
 ﻿#ifndef DEMO_STATE_PLATFORMER_HPP
 #define DEMO_STATE_PLATFORMER_HPP
 
-#include <contact_callback_player_enemy.hpp>
-#include <contact_callback_player_ground.hpp>
-#include <level.hpp>
-#include <platform_player.hpp>
 #include <box2dwrapper/box2d_object.hpp>
 #include <box2dwrapper/box2d_world_interface.hpp>
+#include <contact_callback_player_enemy.hpp>
+#include <contact_callback_player_ground.hpp>
 #include <game_state.hpp>
+#include <level.hpp>
 #include <particle_system.hpp>
+#include <platform_player.hpp>
 #include <screeneffects/vignette.hpp>
 #include <shape.hpp>
 #include <tilemap/tile_layer.hpp>
@@ -23,7 +23,8 @@ private:
 
     std::string m_levelName { "" };
     std::shared_ptr<Level> m_level { nullptr };
-    std::shared_ptr<Player> m_player { nullptr };
+    std::shared_ptr<Player> m_player1 { nullptr };
+    std::shared_ptr<Player> m_player2 { nullptr };
     std::shared_ptr<jt::Vignette> m_vignette { nullptr };
 
     std::shared_ptr<jt::ParticleSystem<jt::Shape, 50>> m_walkParticles { nullptr };

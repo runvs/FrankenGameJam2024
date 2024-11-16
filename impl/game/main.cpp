@@ -53,6 +53,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     jt::Camera cam { GP::GetZoom() };
     jt::LoggingCamera loggingCamera { cam, logger };
+
     jt::GfxImpl gfx { loggingRenderWindow, loggingCamera };
 
     auto const mouse = std::make_shared<jt::MouseInput>();

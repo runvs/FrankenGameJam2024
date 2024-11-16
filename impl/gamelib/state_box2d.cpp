@@ -1,16 +1,16 @@
 ﻿#include "state_box2d.hpp"
-#include <platform_player.hpp>
 #include <box2dwrapper/box2d_contact_manager.hpp>
 #include <box2dwrapper/box2d_world_impl.hpp>
 #include <box2dwrapper/logging_box2d_contact_manager.hpp>
-#include <input/input_manager.hpp>
-#include <random/random.hpp>
 #include <game_interface.hpp>
+#include <game_properties.hpp>
+#include <input/input_manager.hpp>
+#include <platform_player.hpp>
+#include <random/random.hpp>
 #include <state_menu.hpp>
 #include <tweens/tween_alpha.hpp>
 #include <tweens/tween_position.hpp>
 #include <tweens/tween_rotation.hpp>
-#include <game_properties.hpp>
 
 StatePlatformer::StatePlatformer(std::string const& levelName) { m_levelName = levelName; }
 
@@ -25,25 +25,33 @@ void StatePlatformer::onCreate()
     loadLevel();
 
     CreatePlayer();
-    auto playerGroundContactListener = std::make_shared<ContactCallbackPlayerGround>();
-    playerGroundContactListener->setPlayer(m_player);
-    m_world->getContactManager().registerCallback("player_ground", playerGroundContactListener);
+    auto playerGroundContactListener1 = std::make_shared<ContactCallbackPlayerGround>();
+    playerGroundContactListener1->setPlayer(m_player1);
+    m_world->getContactManager().registerCallback("player_ground1", playerGroundContactListener1);
 
-    auto playerEnemyContactListener = std::make_shared<ContactCallbackPlayerEnemy>();
-    playerEnemyContactListener->setPlayer(m_player);
-    m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener);
+    auto playerGroundContactListener2 = std::make_shared<ContactCallbackPlayerGround>();
+    playerGroundContactListener2->setPlayer(m_player2);
+    m_world->getContactManager().registerCallback("player_ground2", playerGroundContactListener2);
+
+    auto playerEnemyContactListener1 = std::make_shared<ContactCallbackPlayerEnemy>();
+    playerEnemyContactListener1->setPlayer(m_player1);
+    m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener1);
+
+    auto playerEnemyContactListener2 = std::make_shared<ContactCallbackPlayerEnemy>();
+    playerEnemyContactListener2->setPlayer(m_player2);
+    m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener2);
 
     m_vignette = std::make_shared<jt::Vignette>(jt::Vector2f { 400.0f, 300.0f });
     add(m_vignette);
     setAutoDraw(false);
 }
+
 void StatePlatformer::onEnter() { }
 
 void StatePlatformer::loadLevel()
 {
     m_level = std::make_shared<Level>("assets/test/integration/demo/" + m_levelName, m_world);
     add(m_level);
-
 }
 
 void StatePlatformer::onUpdate(float const elapsed)
@@ -53,12 +61,13 @@ void StatePlatformer::onUpdate(float const elapsed)
         std::int32_t const positionIterations = 20;
         m_world->step(elapsed, velocityIterations, positionIterations);
 
-        if (!m_player->isAlive()) {
+        // TODO death condition for player 2
+        if (!m_player1->isAlive()) {
             endGame();
         }
-        m_level->checkIfPlayerIsInKillbox(m_player->getPosition(), [this]() { endGame(); });
+        m_level->checkIfPlayerIsInKillbox(m_player1->getPosition(), [this]() { endGame(); });
         m_level->checkIfPlayerIsInExit(
-            m_player->getPosition(), [this](std::string const& newLevelName) {
+            m_player1->getPosition(), [this](std::string const& newLevelName) {
                 if (!m_ending) {
                     m_ending = true;
                     getGame()->stateManager().switchState(
@@ -103,7 +112,10 @@ void StatePlatformer::endGame()
 void StatePlatformer::handleCameraScrolling(float const elapsed)
 {
     // TODO add y scrolling if needed
-    auto ps = m_player->getPosOnScreen();
+    auto const ps1 = m_player1->getPosOnScreen();
+    auto const ps2 = m_player1->getPosOnScreen();
+
+    auto const ps = 0.5f * (ps1 + ps2);
 
     float const topMargin = 100.0f;
     float const botMargin = 100.0f;
@@ -116,7 +128,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 
     auto const dif = cp - ps;
     auto const dist = jt::MathHelper::length(dif);
-//    std::cout << dist << " " << dif.x << " " << dif.y << std::endl;
+    //    std::cout << dist << " " << dif.x << " " << dif.y << std::endl;
     float const scrollSpeed = 60.0f;
 
     auto const screenWidth = 400.0f;
@@ -134,14 +146,14 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     }
 
     if (ps.y < topMargin) {
-        cam.move(jt::Vector2f { 0.0f, -scrollSpeed * elapsed});
+        cam.move(jt::Vector2f { 0.0f, -scrollSpeed * elapsed });
         if (ps.y < rightMargin / 2) {
             cam.move(jt::Vector2f { 0.0f, -scrollSpeed * elapsed });
         }
     } else if (ps.y > screenHeight - botMargin) {
-        cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed});
+        cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed });
         if (ps.y > screenWidth - rightMargin / 3 * 2) {
-            cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed});
+            cam.move(jt::Vector2f { 0.0f, scrollSpeed * elapsed });
         }
     }
 
@@ -171,7 +183,8 @@ void StatePlatformer::onDraw() const
 {
     m_level->draw();
 
-    m_player->draw();
+    m_player1->draw();
+    m_player2->draw();
     m_walkParticles->draw();
     m_playerJumpParticles->draw();
     m_vignette->draw();
@@ -179,15 +192,22 @@ void StatePlatformer::onDraw() const
 
 void StatePlatformer::CreatePlayer()
 {
-    m_player = std::make_shared<Player>(m_world);
-    m_player->setPosition(m_level->getPlayerStart());
+    m_player1 = std::make_shared<Player>(m_world);
+    m_player1->setPosition(m_level->getPlayerStart());
+    m_player1->setLevelSize(m_level->getLevelSizeInPixel());
+    add(m_player1);
+
+    m_player2 = std::make_shared<Player>(m_world);
+    m_player2->setPosition(m_level->getPlayerStart() + jt::Vector2f { 10.0f, 0.0f });
+    m_player2->setLevelSize(m_level->getLevelSizeInPixel());
+    add(m_player2);
+
     getGame()->gfx().camera().setCamOffset(m_level->getPlayerStart() - GP::GetScreenSize() * 0.5f);
-    m_player->setLevelSize(m_level->getLevelSizeInPixel());
-    add(m_player);
 
     createPlayerWalkParticles();
     createPlayerJumpParticleSystem();
 }
+
 void StatePlatformer::createPlayerJumpParticleSystem()
 {
     m_playerJumpParticles = jt::ParticleSystem<jt::Shape, 50>::createPS(
@@ -229,7 +249,8 @@ void StatePlatformer::createPlayerJumpParticleSystem()
             add(twr);
         });
     add(m_playerJumpParticles);
-    m_player->setJumpParticleSystem(m_playerJumpParticles);
+    m_player1->setJumpParticleSystem(m_playerJumpParticles);
+    m_player2->setJumpParticleSystem(m_playerJumpParticles);
 }
 
 void StatePlatformer::createPlayerWalkParticles()
@@ -272,7 +293,8 @@ void StatePlatformer::createPlayerWalkParticles()
             });
         });
     add(m_walkParticles);
-    m_player->setWalkParticleSystem(m_walkParticles);
+    m_player1->setWalkParticleSystem(m_walkParticles);
+    m_player2->setWalkParticleSystem(m_walkParticles);
 }
 
 std::string StatePlatformer::getName() const { return "Box2D"; }
