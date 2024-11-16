@@ -129,7 +129,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     auto const dif = cp - ps;
     auto const dist = jt::MathHelper::length(dif);
     //    std::cout << dist << " " << dif.x << " " << dif.y << std::endl;
-    float const scrollSpeed = 60.0f;
+    float const scrollSpeed = 200.0f;
 
     auto const screenWidth = 400.0f;
     auto const screenHeight = 300.0f;

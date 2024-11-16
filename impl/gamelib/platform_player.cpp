@@ -1,5 +1,6 @@
 #include "platform_player.hpp"
 
+#include "conversions.hpp"
 #include "line.hpp"
 #include <game_interface.hpp>
 #include <math_helper.hpp>
@@ -36,8 +37,7 @@ void Player::doCreate()
     b2PolygonShape polygonShape;
     polygonShape.SetAsBox(3.0f, 0.2f, b2Vec2(0, 4), 0);
     fixtureDef.shape = &polygonShape;
-    auto footSensorFixture = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
-    footSensorFixture->SetUserData((void*)g_userDataPlayerFeetID);
+    m_footSensorFixture = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
 }
 
 void Player::updateGravity(jt::Vector2f const& currentPosition)
@@ -61,9 +61,25 @@ std::shared_ptr<jt::Animation> Player::getAnimation() { return m_animation; }
 
 void Player::doUpdate(float const elapsed)
 {
+    m_physicsObject->getB2Body()->DestroyFixture(m_footSensorFixture);
+    b2FixtureDef fixtureDef;
+    fixtureDef.isSensor = true;
+    b2PolygonShape polygonShape;
+
+    auto const rotDeg = -jt::MathHelper::angleOf(m_gravityDirection) - 90;
+    auto const halfAxis = jt::MathHelper::rotateBy(jt::Vector2f { 3.0f, 0.2f }, rotDeg);
+    auto const center = jt::MathHelper::rotateBy(jt::Vector2f { 0, 4 }, rotDeg);
+
+    polygonShape.SetAsBox(halfAxis.x, halfAxis.y, jt::Conversion::vec(center), 0);
+    fixtureDef.shape = &polygonShape;
+    m_footSensorFixture = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
+    m_footSensorFixture->SetUserData((void*)g_userDataPlayerFeetID);
+
     auto currentPosition = m_physicsObject->getPosition();
     clampPositionToLevelSize(currentPosition);
     m_physicsObject->setPosition(currentPosition);
+
+    // m_physicsObject->getB2Body()->SetTransform(m_physicsObject->getB2Body()->GetPosition(), rot);
     m_animation->setPosition(currentPosition);
     updateGravity(currentPosition);
     updateAnimation(elapsed);

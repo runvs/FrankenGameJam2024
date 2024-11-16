@@ -50,6 +50,8 @@ private:
 
     float m_wantsToJumpTimer { 0.0f };
 
+    b2Fixture* m_footSensorFixture;
+
     bool canJump() const;
     void doCreate() override;
     void updateGravity(jt::Vector2f const& currentPosition);
