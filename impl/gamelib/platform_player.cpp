@@ -79,7 +79,6 @@ void Player::doUpdate(float const elapsed)
     clampPositionToLevelSize(currentPosition);
     m_physicsObject->setPosition(currentPosition);
 
-    // m_physicsObject->getB2Body()->SetTransform(m_physicsObject->getB2Body()->GetPosition(), rot);
     m_animation->setPosition(currentPosition);
     updateGravity(currentPosition);
     updateAnimation(elapsed);

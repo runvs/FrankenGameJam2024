@@ -25,11 +25,11 @@ void StatePlatformer::onCreate()
     loadLevel();
 
     CreatePlayer();
-    auto playerGroundContactListener1 = std::make_shared<ContactCallbackPlayerGround>();
+    auto const playerGroundContactListener1 = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener1->setPlayer(m_player1);
     m_world->getContactManager().registerCallback("player_ground1", playerGroundContactListener1);
 
-    auto playerGroundContactListener2 = std::make_shared<ContactCallbackPlayerGround>();
+    auto const playerGroundContactListener2 = std::make_shared<ContactCallbackPlayerGround>();
     playerGroundContactListener2->setPlayer(m_player2);
     m_world->getContactManager().registerCallback("player_ground2", playerGroundContactListener2);
 
@@ -116,7 +116,6 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     auto const ps2 = m_player2->getPosOnScreen();
 
     auto const ps = 0.5f * (ps1 + ps2);
-    std::cout << "1 " << ps1 << "\t2 " << ps2 << "\tps: " << ps << std::endl;
 
     float const topMargin = 100.0f;
     float const botMargin = 100.0f;
@@ -129,7 +128,6 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
 
     auto const dif = cp - ps;
     auto const dist = jt::MathHelper::length(dif);
-    //    std::cout << dist << " " << dif.x << " " << dif.y << std::endl;
     float const scrollSpeed = 200.0f;
 
     auto const screenWidth = GP::GetScreenSize().x;

@@ -64,6 +64,7 @@ int main(int /*argc*/, char* /*argv*/[])
     jt::AudioImpl audio {};
 
     jt::StateManager stateManager { std::make_shared<StatePlatformer>() };
+    // jt::StateManager stateManager { std::make_shared<StateStartWithButton>() };
     jt::LoggingStateManager loggingStateManager { stateManager, logger };
 
     jt::ActionCommandManager actionCommandManager(logger);
