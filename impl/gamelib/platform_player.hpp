@@ -1,6 +1,7 @@
 ﻿#ifndef JAMTEMPLATE_DEMO_PLATFORM_PLAYER
 #define JAMTEMPLATE_DEMO_PLATFORM_PLAYER
 
+#include "line.hpp"
 #include <animation.hpp>
 #include <box2dwrapper/box2d_object.hpp>
 #include <game_object.hpp>
@@ -41,7 +42,7 @@ private:
     bool m_wasTouchingGroundLastFrame { false };
 
     bool m_isMoving { false };
-
+    jt::Vector2f m_gravityDirection { 0.0f, -1.0 };
     jt::Vector2f m_levelSizeInTiles { 0.0f, 0.0f };
 
     float m_lastTouchedGroundTimer { 0.0f };
@@ -51,6 +52,7 @@ private:
 
     bool canJump() const;
     void doCreate() override;
+    void updateGravity(jt::Vector2f const& currentPosition);
     void doUpdate(float const elapsed) override;
     void doDraw() const override;
 
@@ -58,6 +60,7 @@ private:
     void updateAnimation(float elapsed);
     void clampPositionToLevelSize(jt::Vector2f& currentPosition) const;
     bool m_horizontalMovement { false };
+    std::shared_ptr<jt::Line> m_gravityGizmo;
 };
 
 #endif // JAMTEMPLATE_DEMO_PLATFORM_PLAYER
