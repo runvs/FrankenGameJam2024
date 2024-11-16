@@ -41,7 +41,7 @@ void StatePlatformer::onCreate()
     playerEnemyContactListener2->setPlayer(m_player2);
     m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener2);
 
-    m_vignette = std::make_shared<jt::Vignette>(jt::Vector2f { 427.0f, 320.0f });
+    m_vignette = std::make_shared<jt::Vignette>(GP::GetScreenSize());
     add(m_vignette);
     setAutoDraw(false);
 }

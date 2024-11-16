@@ -1,4 +1,6 @@
 #include "level.hpp"
+
+#include "game_properties.hpp"
 #include <enemy_movement_horizontal.hpp>
 #include <enemy_movement_vertical.hpp>
 #include <game_interface.hpp>
@@ -16,7 +18,7 @@ Level::Level(std::string const& fileName, std::weak_ptr<jt::Box2DWorldInterface>
 void Level::doCreate()
 {
     m_background = std::make_shared<jt::Shape>();
-    m_background->makeRect(jt::Vector2f { 427, 320 }, textureManager());
+    m_background->makeRect(GP::GetScreenSize(), textureManager());
 
     m_background->setCamMovementFactor(0.0f);
 
@@ -51,8 +53,10 @@ void Level::doCreate()
 void Level::loadMovingPlatforms(jt::tilemap::TilesonLoader& loader)
 {
     auto const platform_infos = loader.loadObjectsFromLayer("platforms");
+
     std::map<std::string, std::pair<jt::Vector2f, float>> allPositionsInLevel;
     for (auto const& p : platform_infos) {
+
         if (!p.properties.strings.contains("type")) {
             float waitTime = 0.0f;
             if (p.properties.floats.contains("wait")) {
