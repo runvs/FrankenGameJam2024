@@ -10,6 +10,7 @@
 #include <tweens/tween_alpha.hpp>
 #include <tweens/tween_position.hpp>
 #include <tweens/tween_rotation.hpp>
+#include <game_properties.hpp>
 
 StatePlatformer::StatePlatformer(std::string const& levelName) { m_levelName = levelName; }
 
@@ -42,6 +43,7 @@ void StatePlatformer::loadLevel()
 {
     m_level = std::make_shared<Level>("assets/test/integration/demo/" + m_levelName, m_world);
     add(m_level);
+
 }
 
 void StatePlatformer::onUpdate(float const elapsed)
@@ -103,12 +105,19 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     // TODO add y scrolling if needed
     auto ps = m_player->getPosOnScreen();
 
-    float const topMargin = 150.0f;
-    float const botMargin = 150.0f;
+    float const topMargin = 100.0f;
+    float const botMargin = 100.0f;
     float const rightMargin = 150.0f;
     float const leftMargin = 150.0f;
-    float const scrollSpeed = 60.0f;
+
     auto& cam = getGame()->gfx().camera();
+
+    auto const cp = cam.getCamOffset();
+
+    auto const dif = cp - ps;
+    auto const dist = jt::MathHelper::length(dif);
+//    std::cout << dist << " " << dif.x << " " << dif.y << std::endl;
+    float const scrollSpeed = 60.0f;
 
     auto const screenWidth = 400.0f;
     auto const screenHeight = 300.0f;
@@ -147,6 +156,7 @@ void StatePlatformer::handleCameraScrolling(float const elapsed)
     auto const levelWidth = m_level->getLevelSizeInPixel().x;
     auto const levelHeight = m_level->getLevelSizeInPixel().y;
     auto const maxCamPositionX = levelWidth - screenWidth;
+
     auto const maxCamPositionY = levelHeight - screenHeight;
     if (offset.x > maxCamPositionX) {
         offset.x = maxCamPositionX;
@@ -171,6 +181,7 @@ void StatePlatformer::CreatePlayer()
 {
     m_player = std::make_shared<Player>(m_world);
     m_player->setPosition(m_level->getPlayerStart());
+    getGame()->gfx().camera().setCamOffset(m_level->getPlayerStart() - GP::GetScreenSize() * 0.5f);
     m_player->setLevelSize(m_level->getLevelSizeInPixel());
     add(m_player);
 
