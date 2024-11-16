@@ -10,6 +10,15 @@
 #include <Box2D/Box2D.h>
 #include <memory>
 
+struct InputState {
+    bool isUpPressed;
+    bool isDownPressed;
+    bool isLeftPressed;
+    bool isRightPressed;
+    bool isJumpPressed;
+    bool isJumpJustPressed;
+};
+
 class Player : public jt::GameObject {
 public:
     using Sptr = std::shared_ptr<Player>;
@@ -62,6 +71,7 @@ private:
 
     void handleMovement(float const elapsed);
     void updateAnimation(float elapsed);
+    InputState queryInput();
     void clampPositionToLevelSize(jt::Vector2f& currentPosition) const;
     bool m_horizontalMovement { false };
     std::shared_ptr<jt::Line> m_gravityGizmo;

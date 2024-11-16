@@ -1,5 +1,6 @@
 #include "platform_player.hpp"
 
+#include "../../cmake-build-debug/_deps/sfml-src/src/SFML/Window/Win32/CursorImpl.hpp"
 #include "conversions.hpp"
 #include "line.hpp"
 #include <game_interface.hpp>
@@ -138,6 +139,38 @@ void Player::updateAnimation(float elapsed)
     }
 }
 
+InputState Player::queryInput()
+{
+    InputState result = {};
+    auto const keyboard = getGame()->input().keyboard();
+    if (m_playerId == 0) {
+        result.isLeftPressed = keyboard->pressed(jt::KeyCode::A);
+        result.isRightPressed = keyboard->pressed(jt::KeyCode::D);
+        result.isUpPressed = keyboard->pressed(jt::KeyCode::W);
+        result.isDownPressed = keyboard->pressed(jt::KeyCode::S);
+        result.isJumpJustPressed = keyboard->justPressed(jt::KeyCode::Space);
+        result.isJumpPressed = keyboard->pressed(jt::KeyCode::Space);
+    }
+    if (m_playerId == 1) {
+        result.isLeftPressed
+            = keyboard->pressed(jt::KeyCode::J) || keyboard->pressed(jt::KeyCode::Left);
+        result.isRightPressed
+            = keyboard->pressed(jt::KeyCode::L) || keyboard->pressed(jt::KeyCode::Right);
+        result.isUpPressed
+            = keyboard->pressed(jt::KeyCode::I) || keyboard->pressed(jt::KeyCode::Up);
+        result.isDownPressed
+            = keyboard->pressed(jt::KeyCode::K) || keyboard->pressed(jt::KeyCode::Down);
+        result.isJumpJustPressed = keyboard->justPressed(jt::KeyCode::RShift);
+        result.isJumpPressed = keyboard->pressed(jt::KeyCode::RShift);
+    }
+
+    auto const gamepad = getGame()->input().gamepad(m_playerId);
+    result.isJumpJustPressed |= gamepad->justPressed(jt::GamepadButtonCode::GBA);
+    result.isJumpPressed |= gamepad->pressed(jt::GamepadButtonCode::GBA);
+
+    return result;
+}
+
 void Player::handleMovement(float const elapsed)
 {
     auto const horizontalAcceleration = 15000.0f;
@@ -162,18 +195,21 @@ void Player::handleMovement(float const elapsed)
         = jt::MathHelper::rotateBy(m_physicsObject->getVelocity(), degreesToHorizontalRotation);
 
     auto inputAxis = getGame()->input().gamepad(m_playerId)->getAxis(jt::GamepadAxisCode::ALeft);
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::D)) {
+
+    auto inputState = queryInput();
+    if (inputState.isRightPressed) {
         inputAxis.x += 1;
     }
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::A)) {
+    if (inputState.isLeftPressed) {
         inputAxis.x -= 1;
     }
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::W)) {
+    if (inputState.isUpPressed) {
         inputAxis.y -= 1;
     }
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::S)) {
+    if (inputState.isDownPressed) {
         inputAxis.y += 1;
     }
+
     jt::MathHelper::normalizeMe(inputAxis);
     // if (inputAxis.x > 0) {
     //     m_horizontalMovement = true;
@@ -193,8 +229,7 @@ void Player::handleMovement(float const elapsed)
             true);
     }
 
-    if (getGame()->input().keyboard()->justPressed(jt::KeyCode::Space)
-        || getGame()->input().gamepad(m_playerId)->justPressed(jt::GamepadButtonCode::GBA)) {
+    if (inputState.isJumpJustPressed) {
         if (m_wantsToJumpTimer <= 0.0f) {
             m_wantsToJumpTimer = preLandJumpTimeFrame;
         }
@@ -209,8 +244,7 @@ void Player::handleMovement(float const elapsed)
     }
 
     // Jump
-    if (getGame()->input().keyboard()->pressed(jt::KeyCode::Space)
-        || getGame()->input().gamepad(m_playerId)->pressed(jt::GamepadButtonCode::GBA)) {
+    if (inputState.isJumpPressed) {
         if (v_rotated.y < 0) {
             b2b->ApplyForceToCenter(b2Vec2 { -m_gravityDirection.x, -m_gravityDirection.y }, true);
         }
