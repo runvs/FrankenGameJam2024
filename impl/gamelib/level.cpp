@@ -16,7 +16,7 @@ Level::Level(std::string const& fileName, std::weak_ptr<jt::Box2DWorldInterface>
 void Level::doCreate()
 {
     m_background = std::make_shared<jt::Shape>();
-    m_background->makeRect(jt::Vector2f { 400, 300 }, textureManager());
+    m_background->makeRect(jt::Vector2f { 427, 320 }, textureManager());
 
     m_background->setCamMovementFactor(0.0f);
 
