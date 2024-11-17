@@ -6,7 +6,9 @@ void Postcard::doCreate()
 {
     m_animation = std::make_shared<jt::Animation>();
     m_animation->loadFromAseprite("assets/postcards.aseprite", textureManager());
+
     m_animation->play(std::to_string(jt::Random::getInt(0, 4)));
+
     m_animation->setOrigin(jt::OriginMode::CENTER);
 }
 
