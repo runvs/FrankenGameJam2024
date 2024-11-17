@@ -42,6 +42,7 @@ public:
     void setLevelSize(jt::Vector2f const& levelSizeInTiles);
     void setPlayerId(int playerId);
     int getPlayerId() const;
+    void resetVelocity() const;
 
 private:
     std::shared_ptr<jt::Animation> m_animation;

@@ -53,7 +53,9 @@ void StatePlatformer::respawnPlayer(int const id) const
     auto const respawningPlayer = id == 0 ? m_player0 : m_player1;
     auto const otherPlayer = id == 0 ? m_player1 : m_player0;
 
-    respawningPlayer->setPosition(otherPlayer->getPosition() - otherPlayer->getGravityDirection());
+    respawningPlayer->setPosition(
+        otherPlayer->getPosition() - otherPlayer->getGravityDirection() * 4);
+    respawningPlayer->resetVelocity();
 }
 
 void StatePlatformer::loadLevel()
@@ -64,6 +66,15 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
+    if (getGame()->input().gamepad(0)->justPressed(jt::GamepadButtonCode::GBX)
+        || getGame()->input().keyboard()->pressed(jt::KeyCode::R)) {
+        respawnPlayer(m_player0->getPlayerId());
+    }
+    if (getGame()->input().gamepad(1)->justPressed(jt::GamepadButtonCode::GBX)
+        || getGame()->input().keyboard()->pressed(jt::KeyCode::P)) {
+        respawnPlayer(m_player1->getPlayerId());
+    }
+
     if (!m_ending && !getGame()->stateManager().getTransition()->isInProgress()) {
         std::int32_t const velocityIterations = 20;
         std::int32_t const positionIterations = 20;

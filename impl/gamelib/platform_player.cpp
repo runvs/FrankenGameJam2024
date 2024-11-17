@@ -341,6 +341,8 @@ void Player::setPlayerId(int playerId) { m_playerId = playerId; }
 
 int Player::getPlayerId() const { return m_playerId; }
 
+void Player::resetVelocity() const { m_physicsObject->setVelocity({ 0, 0 }); }
+
 bool Player::canJump() const
 {
     if (m_lastJumpTimer >= 0.0f) {
