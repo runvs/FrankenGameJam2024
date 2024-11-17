@@ -2043,6 +2043,73 @@
          "y":0
         }, 
         {
+         "color":"#ffff00",
+         "draworder":"topdown",
+         "id":9,
+         "name":"postcards",
+         "objects":[
+                {
+                 "height":16,
+                 "id":392,
+                 "name":"0",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":984,
+                 "y":88
+                }, 
+                {
+                 "height":16,
+                 "id":393,
+                 "name":"1",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1432,
+                 "y":840
+                }, 
+                {
+                 "height":16,
+                 "id":394,
+                 "name":"2",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":992,
+                 "y":1080
+                }, 
+                {
+                 "height":16,
+                 "id":395,
+                 "name":"3",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":392,
+                 "y":752
+                }, 
+                {
+                 "height":16,
+                 "id":396,
+                 "name":"4",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":376,
+                 "y":288
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "draworder":"topdown",
          "id":2,
          "name":"settings",
@@ -2096,8 +2163,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":392,
+ "nextlayerid":10,
+ "nextobjectid":397,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.0",

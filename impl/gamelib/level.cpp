@@ -29,6 +29,7 @@ void Level::doCreate()
     loadLevelTileLayer(loader);
     loadLevelCollisions(loader);
     loadLevelKillboxes(loader);
+    loadLevelPostcards(loader);
     loadMovingPlatforms(loader);
 
     auto const enemies = loader.loadObjectsFromLayer("enemies");
@@ -129,6 +130,21 @@ void Level::loadLevelKillboxes(jt::tilemap::TilesonLoader& loader)
     }
 }
 
+void Level::loadLevelPostcards(jt::tilemap::TilesonLoader& loader)
+{
+    auto const postcardInfos = loader.loadObjectsFromLayer("postcards");
+    for (auto const& i : postcardInfos) {
+        std::string name { i.name };
+
+        auto postcard = std::make_shared<Postcard>();
+        postcard->setGameInstance(getGame());
+        postcard->create();
+        m_postcards.push_back(postcard);
+        postcard->m_animation->setPosition(i.position);
+        postcard->m_animation->play(name);
+    }
+}
+
 void Level::loadLevelCollisions(jt::tilemap::TilesonLoader& loader)
 {
     auto tileCollisions = loader.loadCollisionsFromLayer("ground");
@@ -186,6 +202,9 @@ void Level::doUpdate(float const elapsed)
     for (auto& exit : m_exits) {
         exit.update(elapsed);
     }
+    for (auto& postcard : m_postcards) {
+        postcard->update(elapsed);
+    }
     for (auto& p : m_movingPlatforms) {
         p->update(elapsed);
     }
@@ -203,6 +222,9 @@ void Level::doDraw() const
     m_tileLayerGround->draw(renderTarget());
     for (auto const& exit : m_exits) {
         exit.draw();
+    }
+    for (auto const& postcard : m_postcards) {
+        postcard->draw();
     }
     for (auto const& p : m_movingPlatforms) {
         p->draw();
@@ -222,6 +244,21 @@ void Level::checkIfPlayerIsInKillbox(
 {
     for (auto const& kb : m_killboxes) {
         kb->checkIfPlayerIsInKillbox(playerPosition, callback);
+    }
+}
+
+void Level::checkIfPlayerIsInPostcard(
+    jt::Vector2f const& playerPosition, std::function<void(std::shared_ptr<Postcard>)> callback)
+{
+    for (auto& postcard : m_postcards) {
+        if (postcard->picked == false) {
+            jt::Rectf const postcardRect { postcard->m_animation->getPosition().x,
+                postcard->m_animation->getPosition().y, 16, 16 };
+            if (jt::MathHelper::checkIsIn(postcardRect, playerPosition)) {
+                postcard->picked = true;
+                callback(postcard);
+            }
+        }
     }
 }
 

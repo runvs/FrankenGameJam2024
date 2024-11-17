@@ -1,4 +1,6 @@
 ﻿#include "state_box2d.hpp"
+
+#include "tweens/tween_scale.hpp"
 #include <box2dwrapper/box2d_contact_manager.hpp>
 #include <box2dwrapper/box2d_world_impl.hpp>
 #include <box2dwrapper/logging_box2d_contact_manager.hpp>
@@ -95,6 +97,17 @@ void StatePlatformer::onUpdate(float const elapsed)
             auto const dieSound = getGame()->audio().addTemporarySound("event:/death-by-spikes-p2");
             dieSound->play();
         });
+
+        m_level->checkIfPlayerIsInPostcard(
+            m_player0->getPosition(), [this](std::shared_ptr<Postcard> pc) {
+                add(jt::TweenAlpha::create(pc->m_animation, 0.5f, 255u, 0u));
+                add(jt::TweenScale::create(pc->m_animation, 0.5f, { 1.0f, 1.0f }, { 2.0f, 2.0f }));
+            });
+        m_level->checkIfPlayerIsInPostcard(
+            m_player1->getPosition(), [this](std::shared_ptr<Postcard> pc) {
+                add(jt::TweenAlpha::create(pc->m_animation, 0.5f, 255u, 0u));
+                add(jt::TweenScale::create(pc->m_animation, 0.5f, { 1.0f, 1.0f }, { 2.0f, 2.0f }));
+            });
 
         handleCameraScrolling(elapsed);
     }
