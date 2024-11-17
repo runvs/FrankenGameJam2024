@@ -85,16 +85,6 @@ void Player::doUpdate(float const elapsed)
     updateAnimation(elapsed);
     handleMovement(elapsed);
 
-    if (m_isTouchingGround != m_wasTouchingGroundLastFrame) {
-        auto count = 25;
-        if (m_wasTouchingGroundLastFrame) {
-            count = 10;
-        }
-        auto ps = m_postJumpParticles.lock();
-        if (ps) {
-            ps->fire(count, currentPosition + jt::Vector2f { 0.0f, 5.0f });
-        }
-    }
     m_wasTouchingGroundLastFrame = m_isTouchingGround;
 
     m_lastTouchedGroundTimer -= elapsed;
@@ -259,6 +249,12 @@ void Player::handleMovement(float const elapsed)
         if (canJump()) {
             m_lastJumpTimer = jumpDeadTime;
             v_rotated.y = jumpInitialVelocity;
+
+            auto const count = m_wasTouchingGroundLastFrame ? 10 : 25;
+            auto ps = m_postJumpParticles.lock();
+            if (ps) {
+                ps->fire(count, getPosition() + jt::Vector2f { 0.0f, 5.0f });
+            }
         }
     }
 
