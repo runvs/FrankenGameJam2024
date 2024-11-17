@@ -1,6 +1,5 @@
 #include "platform_player.hpp"
 
-#include "../../cmake-build-debug/_deps/sfml-src/src/SFML/Window/Win32/CursorImpl.hpp"
 #include "conversions.hpp"
 #include "line.hpp"
 #include <game_interface.hpp>
