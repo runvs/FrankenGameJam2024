@@ -193,7 +193,7 @@ void Player::handleMovement(float const elapsed)
     auto const maxHorizontalVelocity = 90.0f;
     auto const horizontalDampening = 130.0f;
 
-    auto const jumpInitialVelocity = -140.0f;
+    auto const jumpInitialVelocity = -200.0f;
     auto const maxVerticalVelocity = 100.0f;
     auto const jumpVerticalAcceleration = -9500.0f;
 
