@@ -190,11 +190,11 @@ InputState Player::queryInput()
 void Player::handleMovement(float const elapsed)
 {
     auto const horizontalAcceleration = 15000.0f;
-    auto const maxHorizontalVelocity = 90.0f;
+    auto const maxHorizontalVelocity = 250.0f;
     auto const horizontalDampening = 130.0f;
 
-    auto const jumpInitialVelocity = -200.0f;
-    auto const maxVerticalVelocity = 100.0f;
+    auto const jumpInitialVelocity = -250.0f;
+    auto const maxVerticalVelocity = maxHorizontalVelocity;
     auto const jumpVerticalAcceleration = -9500.0f;
 
     auto const jumpDeadTime = 0.3f;
@@ -227,13 +227,12 @@ void Player::handleMovement(float const elapsed)
     }
 
     jt::MathHelper::normalizeMe(inputAxis);
-    // if (inputAxis.x > 0) {
-    //     m_horizontalMovement = true;
-    // }
-    //
-    // if (inputAxis.x < 0) {
-    //     m_horizontalMovement = true;
-    // }
+    if (inputAxis.x > 0) {
+        m_horizontalMovement = true;
+    }
+    if (inputAxis.x < 0) {
+        m_horizontalMovement = true;
+    }
 
     auto constexpr inputDeadZone = 0.2;
     if (jt::MathHelper::length(inputAxis) > inputDeadZone) {
@@ -295,7 +294,7 @@ void Player::handleMovement(float const elapsed)
     // }
 
     auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
-    m_physicsObject->setVelocity(v);
+    m_physicsObject->setVelocity(v * 0.99);
 }
 
 b2Body* Player::getB2Body() { return m_physicsObject->getB2Body(); }
