@@ -37,6 +37,7 @@ private:
 
     void onCreate() override;
     void onEnter() override;
+    void respawnPlayer(int id) const;
     void onUpdate(float const /*elapsed*/) override;
     void onDraw() const override;
 

@@ -48,6 +48,16 @@ void StatePlatformer::onCreate()
 
 void StatePlatformer::onEnter() { }
 
+void StatePlatformer::respawnPlayer(int const id) const
+{
+    auto const respawningPlayer = id == 0 ? m_player0 : m_player1;
+    auto const otherPlayer = id == 0 ? m_player1 : m_player0;
+
+    respawningPlayer->setPosition(
+        otherPlayer->getPosition() - otherPlayer->getGravityDirection() * 4);
+    respawningPlayer->resetVelocity();
+}
+
 void StatePlatformer::loadLevel()
 {
     m_level = std::make_shared<Level>("assets/test/integration/demo/" + m_levelName, m_world);
@@ -56,24 +66,28 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
+    if (getGame()->input().gamepad(0)->justPressed(jt::GamepadButtonCode::GBX)
+        || getGame()->input().keyboard()->pressed(jt::KeyCode::R)) {
+        respawnPlayer(m_player0->getPlayerId());
+    }
+    if (getGame()->input().gamepad(1)->justPressed(jt::GamepadButtonCode::GBX)
+        || getGame()->input().keyboard()->pressed(jt::KeyCode::P)) {
+        respawnPlayer(m_player1->getPlayerId());
+    }
+
     if (!m_ending && !getGame()->stateManager().getTransition()->isInProgress()) {
         std::int32_t const velocityIterations = 20;
         std::int32_t const positionIterations = 20;
         m_world->step(elapsed, velocityIterations, positionIterations);
 
-        // TODO death condition for player 2
-        if (!m_player0->isAlive()) {
+        if (!m_player0->isAlive() || !m_player1->isAlive()) {
             endGame();
         }
-        m_level->checkIfPlayerIsInKillbox(m_player0->getPosition(), [this]() { endGame(); });
-        m_level->checkIfPlayerIsInExit(
-            m_player0->getPosition(), [this](std::string const& newLevelName) {
-                if (!m_ending) {
-                    m_ending = true;
-                    getGame()->stateManager().switchState(
-                        std::make_shared<StatePlatformer>(newLevelName));
-                }
-            });
+
+        m_level->checkIfPlayerIsInKillbox(
+            m_player0->getPosition(), [this]() { respawnPlayer(m_player0->getPlayerId()); });
+        m_level->checkIfPlayerIsInKillbox(
+            m_player1->getPosition(), [this]() { respawnPlayer(m_player1->getPlayerId()); });
 
         handleCameraScrolling(elapsed);
     }
