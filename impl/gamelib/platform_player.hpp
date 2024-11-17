@@ -44,7 +44,7 @@ public:
     void setPlayerId(int playerId);
     int getPlayerId() const;
     void resetVelocity() const;
-    void setRequestRespawn(bool value);
+    void setRequestRespawn(bool value, bool reason = false);
     bool isRespawnRequested() const;
 
 private:

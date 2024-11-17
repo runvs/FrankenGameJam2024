@@ -357,7 +357,15 @@ int Player::getPlayerId() const { return m_playerId; }
 
 void Player::resetVelocity() const { m_physicsObject->setVelocity({ 0, 0 }); }
 
-void Player::setRequestRespawn(bool value) { m_isRespawnRequested = value; }
+void Player::setRequestRespawn(bool value, bool reason)
+{
+    m_isRespawnRequested = value;
+    if (reason) {
+        auto const deathSound = getGame()->audio().addTemporarySound(
+            "event:/death-p" + std::to_string(m_playerId + 1));
+        deathSound->play();
+    }
+}
 
 bool Player::isRespawnRequested() const { return m_isRespawnRequested; }
 

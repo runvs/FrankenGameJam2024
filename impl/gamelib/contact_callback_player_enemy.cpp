@@ -27,7 +27,7 @@ void ContactCallbackPlayerEnemy::onBeginContact(b2Contact* contact)
     bool optionB = isPlayerFixture(fb) && isEnemyFixture(fa);
 
     if (optionA || optionB) {
-        p->setRequestRespawn(true);
+        p->setRequestRespawn(true, true);
     }
 }
 
