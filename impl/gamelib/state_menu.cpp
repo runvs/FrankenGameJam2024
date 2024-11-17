@@ -30,7 +30,6 @@ void StateMenu::onCreate()
     try {
         auto bgm = getGame()->audio().getPermanentSound("bgm");
         if (bgm == nullptr) {
-
             bgm = getGame()->audio().addPermanentSound("bgm", "event:/main-theme");
             bgm->play();
         }
