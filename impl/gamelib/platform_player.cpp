@@ -48,8 +48,9 @@ void Player::updateGravity(jt::Vector2f const& currentPosition)
     jt::MathHelper::normalizeMe(m_gravityDirection);
     m_gravityDirection *= -1;
 
-    m_gravityGizmo = std::make_shared<jt::Line>(m_gravityDirection * 400);
-    m_gravityGizmo->setPosition(currentPosition);
+    m_gravityGizmo = std::make_shared<jt::Line>(m_gravityDirection * 12);
+    m_gravityGizmo->setColor({ 255, 255, 255, 100 });
+    m_gravityGizmo->setPosition(currentPosition + jt::Vector2f { 0, 0 });
     m_gravityGizmo->update(0.0f);
 
     constexpr auto gravityStrength = 10000.0f;
