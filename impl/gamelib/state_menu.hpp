@@ -22,7 +22,8 @@ public:
 private:
     std::shared_ptr<jt::Shape> m_background;
 
-    std::shared_ptr<jt::Text> m_textTitle;
+    // std::shared_ptr<jt::Text> m_textTitle;
+    std::shared_ptr<jt::Sprite> m_title;
     std::shared_ptr<jt::Text> m_textStart;
     std::shared_ptr<jt::Text> m_textExplanation;
     std::shared_ptr<jt::Text> m_textCredits;
@@ -54,7 +55,7 @@ private:
     void createTweenExplanation();
 
     void onUpdate(float const elapsed) override;
-    void updateDrawables(const float& elapsed);
+    void updateDrawables(float const& elapsed);
     void checkForTransitionToStateGame();
     void startTransitionToStateGame();
 

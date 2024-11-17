@@ -42,8 +42,8 @@ void StateMenu::createVignette()
 
 void StateMenu::createShapes()
 {
-    m_background
-        = jt::dh::createShapeRect(GP::GetScreenSize(), GP::PaletteBackground(), textureManager());
+    m_background = jt::dh::createShapeRect(
+        GP::GetScreenSize(), jt::Color { 70u, 63u, 68u, 255u }, textureManager());
     m_overlay = jt::dh::createShapeRect(GP::GetScreenSize(), jt::colors::Black, textureManager());
 }
 
@@ -57,11 +57,11 @@ void StateMenu::createMenuText()
 
 void StateMenu::createTextExplanation()
 {
-    m_textExplanation
-        = jt::dh::createText(renderTarget(), GP::ExplanationText(), 16u, GP::PaletteFontFront());
+    m_textExplanation = jt::dh::createText(
+        renderTarget(), GP::ExplanationText(), 16u, jt::Color { 245u, 203u, 92u, 255 });
     auto const half_width = GP::GetScreenSize().x / 2.0f;
     m_textExplanation->setPosition({ half_width, 100 });
-    m_textExplanation->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 2, 2 });
+    m_textExplanation->setShadow(jt::Color { 51u, 53u, 51u, 255u }, jt::Vector2f { 2, 2 });
 }
 
 void StateMenu::createTextCredits()
@@ -69,12 +69,12 @@ void StateMenu::createTextCredits()
     m_textCredits = jt::dh::createText(renderTarget(),
         "Created by " + GP::AuthorName() + " for " + GP::JamName() + "\n" + GP::JamDate()
             + "\nF9 for License Information",
-        14u, GP::PaletteFontCredits());
+        14u, jt::Color { 47u, 184u, 218u, 255u });
     m_textCredits->setTextAlign(jt::Text::TextAlign::LEFT);
     m_textCredits->setPosition({ 10, GP::GetScreenSize().y - 70 });
-    m_textCredits->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 1, 1 });
+    m_textCredits->setShadow({ 51u, 53u, 51u, 255u }, jt::Vector2f { 1, 1 });
 
-    m_textVersion = jt::dh::createText(renderTarget(), "", 14u, GP::PaletteFontCredits());
+    m_textVersion = jt::dh::createText(renderTarget(), "", 14u, { 47u, 184u, 218u, 255u });
     if (jt::BuildInfo::gitTagName() != "") {
         m_textVersion->setText(jt::BuildInfo::gitTagName());
     } else {
@@ -89,18 +89,16 @@ void StateMenu::createTextCredits()
 void StateMenu::createTextStart()
 {
     auto const half_width = GP::GetScreenSize().x / 2.0f;
-    m_textStart = jt::dh::createText(
-        renderTarget(), "Press Start or Space to start the game", 16u, GP::PaletteFontFront());
+    m_textStart = jt::dh::createText(renderTarget(), "", 16u, GP::PaletteFontFront());
     m_textStart->setPosition({ half_width, 70 });
     m_textStart->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 2, 2 });
 }
 
 void StateMenu::createTextTitle()
 {
-    float half_width = GP::GetScreenSize().x / 2;
-    m_textTitle = jt::dh::createText(renderTarget(), GP::GameName(), 32u, GP::PaletteFontFront());
-    m_textTitle->setPosition({ half_width, 10 });
-    m_textTitle->setShadow(GP::PaletteFontShadow(), jt::Vector2f { 3, 3 });
+    m_title = std::make_shared<jt::Sprite>("assets/title_2.png", textureManager());
+    m_title->setOrigin(jt::OriginMode::CENTER);
+    m_title->setPosition(GP::GetScreenSize() * 0.5f + jt::Vector2f { 0.0f, -60.0f });
 }
 
 void StateMenu::createTweens()
@@ -147,7 +145,7 @@ void StateMenu::createTweenExplanation()
 
 void StateMenu::createTweenTitleAlpha()
 {
-    auto const tween = jt::TweenAlpha::create(m_textTitle, 0.55f, 0, 255);
+    auto const tween = jt::TweenAlpha::create(m_title, 0.55f, 0, 255);
     tween->setStartDelay(0.2f);
     tween->setSkipTicks();
     add(tween);
@@ -190,7 +188,7 @@ void StateMenu::onUpdate(float const elapsed)
 void StateMenu::updateDrawables(float const& elapsed)
 {
     m_background->update(elapsed);
-    m_textTitle->update(elapsed);
+    m_title->update(elapsed);
     m_textStart->update(elapsed);
     m_textExplanation->update(elapsed);
     m_textCredits->update(elapsed);
@@ -227,7 +225,7 @@ void StateMenu::onDraw() const
 {
     m_background->draw(renderTarget());
 
-    m_textTitle->draw(renderTarget());
+    m_title->draw(renderTarget());
     m_textStart->draw(renderTarget());
     m_textExplanation->draw(renderTarget());
     m_textCredits->draw(renderTarget());
