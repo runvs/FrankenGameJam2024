@@ -80,13 +80,21 @@ void StatePlatformer::onUpdate(float const elapsed)
         m_world->step(elapsed, velocityIterations, positionIterations);
 
         if (!m_player0->isAlive() || !m_player1->isAlive()) {
+
             endGame();
         }
 
-        m_level->checkIfPlayerIsInKillbox(
-            m_player0->getPosition(), [this]() { respawnPlayer(m_player0->getPlayerId()); });
-        m_level->checkIfPlayerIsInKillbox(
-            m_player1->getPosition(), [this]() { respawnPlayer(m_player1->getPlayerId()); });
+        m_level->checkIfPlayerIsInKillbox(m_player0->getPosition(), [this]() {
+            respawnPlayer(m_player0->getPlayerId());
+
+            auto const dieSound = getGame()->audio().addTemporarySound("event:/death-by-spikes-p1");
+            dieSound->play();
+        });
+        m_level->checkIfPlayerIsInKillbox(m_player1->getPosition(), [this]() {
+            respawnPlayer(m_player1->getPlayerId());
+            auto const dieSound = getGame()->audio().addTemporarySound("event:/death-by-spikes-p2");
+            dieSound->play();
+        });
 
         handleCameraScrolling(elapsed);
     }
