@@ -121,10 +121,10 @@ void Player::updateAnimation(float elapsed)
     auto const rotated_velocity = jt::MathHelper::rotateBy(m_physicsObject->getVelocity(), rotDeg);
 
     if (rotated_velocity.x > 0) {
-        // m_animation->play("right");
+        m_animation->play("left");
         m_isMoving = true;
     } else if (rotated_velocity.x < 0) {
-        // m_animation->play("left");
+        m_animation->play("right");
         m_isMoving = true;
     } else {
         m_isMoving = false;
