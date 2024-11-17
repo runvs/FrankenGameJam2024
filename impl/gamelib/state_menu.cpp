@@ -216,8 +216,10 @@ void StateMenu::startTransitionToStateGame()
     if (!m_started) {
         m_started = true;
         getGame()->stateManager().storeCurrentState("menu");
-
         getGame()->stateManager().switchState(std::make_shared<StatePlatformer>());
+
+        auto const startSound = getGame()->audio().addTemporarySound("event:/start-game");
+        startSound->play();
     }
 }
 
