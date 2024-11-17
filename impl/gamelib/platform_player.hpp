@@ -34,6 +34,7 @@ public:
     jt::Vector2f getPosOnScreen() const;
     void setPosition(jt::Vector2f const& pos);
     jt::Vector2f getPosition() const;
+    jt::Vector2f getGravityDirection() const;
 
     void setWalkParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps);
     void setJumpParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps);

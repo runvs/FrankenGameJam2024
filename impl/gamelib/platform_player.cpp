@@ -301,6 +301,8 @@ void Player::setPosition(jt::Vector2f const& pos) { m_physicsObject->setPosition
 
 jt::Vector2f Player::getPosition() const { return m_physicsObject->getPosition(); }
 
+jt::Vector2f Player::getGravityDirection() const { return m_gravityDirection; }
+
 void Player::setWalkParticleSystem(std::weak_ptr<jt::ParticleSystem<jt::Shape, 50>> ps)
 {
     m_walkParticles = ps;
