@@ -21,7 +21,7 @@ void Player::doCreate()
 
     m_animation->loadFromAseprite("assets/player.aseprite", textureManager());
     m_animation->play("idle");
-    m_animation->setOffset(jt::OffsetMode::CENTER);
+    m_animation->setOrigin({ 2, 4 });
 
     b2FixtureDef fixtureDef;
     fixtureDef.density = 1.0f;
@@ -113,16 +113,32 @@ void Player::clampPositionToLevelSize(jt::Vector2f& currentPosition) const
 
 void Player::updateAnimation(float elapsed)
 {
-    if (m_physicsObject->getVelocity().x > 0) {
+    auto const rotDeg
+        = (static_cast<int>(-jt::MathHelper::angleOf(m_gravityDirection)) - 90 + 360) % 360;
+    if (rotDeg < 45) {
+        m_animation->setRotation(0);
+    } else if (rotDeg < 135) {
+        m_animation->setRotation(90);
+    } else if (rotDeg < 225) {
+        m_animation->setRotation(180);
+    } else if (rotDeg < 315) {
+        m_animation->setRotation(270);
+    } else {
+        m_animation->setRotation(0);
+    }
+
+    auto const rotated_velocity = jt::MathHelper::rotateBy(m_physicsObject->getVelocity(), rotDeg);
+
+    if (rotated_velocity.x > 0) {
         // m_animation->play("right");
         m_isMoving = true;
-    } else if (m_physicsObject->getVelocity().x < 0) {
+    } else if (rotated_velocity.x < 0) {
         // m_animation->play("left");
         m_isMoving = true;
     } else {
         m_isMoving = false;
     }
-    auto const v = m_horizontalMovement ? abs(m_physicsObject->getVelocity().x) / 90.0f : 0.0f;
+    auto const v = m_horizontalMovement ? abs(rotated_velocity.x) / 90.0f : 0.0f;
     m_animation->setAnimationSpeedFactor(v);
     m_animation->update(elapsed);
 
@@ -249,10 +265,13 @@ void Player::handleMovement(float const elapsed)
         }
     }
 
+    // clamp velocity
     if (v_rotated.y >= maxVerticalVelocity) {
         v_rotated.y = maxVerticalVelocity;
+    } else if (v_rotated.y <= -maxVerticalVelocity) {
+        v_rotated.y = -maxVerticalVelocity;
     }
-    // clamp horizontal Velocity
+
     if (v_rotated.x >= maxHorizontalVelocity) {
         v_rotated.x = maxHorizontalVelocity;
     } else if (v_rotated.x <= -maxHorizontalVelocity) {
