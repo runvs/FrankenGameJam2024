@@ -30,11 +30,12 @@ void Player::doCreate()
     circleCollider.m_radius = 4.0f;
     fixtureDef.shape = &circleCollider;
     auto playerCollider = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
-    playerCollider->SetUserData((void*)g_userDataPlayerID);
+    playerCollider->SetUserData((void*)(g_userDataPlayerID + m_playerId));
 
     fixtureDef.isSensor = true;
 
     b2PolygonShape polygonShape;
+
     polygonShape.SetAsBox(3.0f, 0.2f, b2Vec2(0, 4), 0);
     fixtureDef.shape = &polygonShape;
     m_footSensorFixture = m_physicsObject->getB2Body()->CreateFixture(&fixtureDef);
@@ -166,6 +167,7 @@ InputState Player::queryInput()
         result.isDownPressed = keyboard->pressed(jt::KeyCode::S);
         result.isJumpJustPressed = keyboard->justPressed(jt::KeyCode::Space);
         result.isJumpPressed = keyboard->pressed(jt::KeyCode::Space);
+        result.isRespawnRequested = keyboard->pressed(jt::KeyCode::R);
     }
     if (m_playerId == 1) {
         result.isLeftPressed
@@ -178,11 +180,13 @@ InputState Player::queryInput()
             = keyboard->pressed(jt::KeyCode::K) || keyboard->pressed(jt::KeyCode::Down);
         result.isJumpJustPressed = keyboard->justPressed(jt::KeyCode::RShift);
         result.isJumpPressed = keyboard->pressed(jt::KeyCode::RShift);
+        result.isRespawnRequested = keyboard->pressed(jt::KeyCode::P);
     }
 
     auto const gamepad = getGame()->input().gamepad(m_playerId);
     result.isJumpJustPressed |= gamepad->justPressed(jt::GamepadButtonCode::GBA);
     result.isJumpPressed |= gamepad->pressed(jt::GamepadButtonCode::GBA);
+    result.isRespawnRequested |= gamepad->justPressed(jt::GamepadButtonCode::GBX);
 
     return result;
 }
@@ -213,6 +217,10 @@ void Player::handleMovement(float const elapsed)
     auto inputAxis = getGame()->input().gamepad(m_playerId)->getAxis(jt::GamepadAxisCode::ALeft);
 
     auto inputState = queryInput();
+    if (inputState.isRespawnRequested) {
+        setRequestRespawn(true);
+    }
+
     if (inputState.isRightPressed) {
         inputAxis.x += 1;
     }
@@ -342,6 +350,10 @@ void Player::setPlayerId(int playerId) { m_playerId = playerId; }
 int Player::getPlayerId() const { return m_playerId; }
 
 void Player::resetVelocity() const { m_physicsObject->setVelocity({ 0, 0 }); }
+
+void Player::setRequestRespawn(bool value) { m_isRespawnRequested = value; }
+
+bool Player::isRespawnRequested() const { return m_isRespawnRequested; }
 
 bool Player::canJump() const
 {

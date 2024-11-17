@@ -17,6 +17,7 @@ struct InputState {
     bool isRightPressed;
     bool isJumpPressed;
     bool isJumpJustPressed;
+    bool isRespawnRequested;
 };
 
 class Player : public jt::GameObject {
@@ -43,6 +44,8 @@ public:
     void setPlayerId(int playerId);
     int getPlayerId() const;
     void resetVelocity() const;
+    void setRequestRespawn(bool value);
+    bool isRespawnRequested() const;
 
 private:
     std::shared_ptr<jt::Animation> m_animation;
@@ -62,6 +65,7 @@ private:
     float m_lastJumpTimer { 0.0f };
 
     float m_wantsToJumpTimer { 0.0f };
+    bool m_isRespawnRequested { false };
 
     b2Fixture* m_footSensorFixture;
 

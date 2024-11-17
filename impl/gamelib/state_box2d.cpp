@@ -35,11 +35,11 @@ void StatePlatformer::onCreate()
 
     auto playerEnemyContactListener1 = std::make_shared<ContactCallbackPlayerEnemy>();
     playerEnemyContactListener1->setPlayer(m_player0);
-    m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener1);
+    m_world->getContactManager().registerCallback("player_enemy1", playerEnemyContactListener1);
 
     auto playerEnemyContactListener2 = std::make_shared<ContactCallbackPlayerEnemy>();
     playerEnemyContactListener2->setPlayer(m_player1);
-    m_world->getContactManager().registerCallback("player_enemy", playerEnemyContactListener2);
+    m_world->getContactManager().registerCallback("player_enemy2", playerEnemyContactListener2);
 
     m_vignette = std::make_shared<jt::Vignette>(GP::GetScreenSize());
     add(m_vignette);
@@ -53,6 +53,7 @@ void StatePlatformer::respawnPlayer(int const id) const
     auto const respawningPlayer = id == 0 ? m_player0 : m_player1;
     auto const otherPlayer = id == 0 ? m_player1 : m_player0;
 
+    respawningPlayer->setRequestRespawn(false);
     respawningPlayer->setPosition(
         otherPlayer->getPosition() - otherPlayer->getGravityDirection() * 4);
     respawningPlayer->resetVelocity();
@@ -66,12 +67,10 @@ void StatePlatformer::loadLevel()
 
 void StatePlatformer::onUpdate(float const elapsed)
 {
-    if (getGame()->input().gamepad(0)->justPressed(jt::GamepadButtonCode::GBX)
-        || getGame()->input().keyboard()->pressed(jt::KeyCode::R)) {
+    if (m_player0->isRespawnRequested()) {
         respawnPlayer(m_player0->getPlayerId());
     }
-    if (getGame()->input().gamepad(1)->justPressed(jt::GamepadButtonCode::GBX)
-        || getGame()->input().keyboard()->pressed(jt::KeyCode::P)) {
+    if (m_player1->isRespawnRequested()) {
         respawnPlayer(m_player1->getPlayerId());
     }
 
