@@ -18,8 +18,8 @@ Player::Player(std::shared_ptr<jt::Box2DWorldInterface> world)
 void Player::doCreate()
 {
     m_animation = std::make_shared<jt::Animation>();
-
-    m_animation->loadFromAseprite("assets/player.aseprite", textureManager());
+    m_animation->loadFromAseprite(
+        m_playerId == 0 ? "assets/player.aseprite" : "assets/Player2.aseprite", textureManager());
     m_animation->play("idle");
     m_animation->setOrigin({ 2, 4 });
 
