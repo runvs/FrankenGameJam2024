@@ -53,7 +53,7 @@ void Player::updateGravity(jt::Vector2f const& currentPosition)
     m_gravityGizmo->setPosition(currentPosition + jt::Vector2f { 0, 0 });
     m_gravityGizmo->update(0.0f);
 
-    constexpr auto gravityStrength = 10000.0f;
+    constexpr auto gravityStrength = 20000.0f;
     m_physicsObject->getB2Body()->ApplyForceToCenter(
         { m_gravityDirection.x * gravityStrength, m_gravityDirection.y * gravityStrength }, true);
 }
@@ -249,7 +249,7 @@ void Player::handleMovement(float const elapsed)
             true);
     }
 
-    if (inputState.isJumpJustPressed) {
+    if (inputState.isJumpPressed) {
         if (m_wantsToJumpTimer <= 0.0f) {
             m_wantsToJumpTimer = preLandJumpTimeFrame;
         }
@@ -257,15 +257,21 @@ void Player::handleMovement(float const elapsed)
 
     if (m_wantsToJumpTimer >= 0.0f) {
         if (canJump()) {
-
             m_lastJumpTimer = jumpDeadTime;
             v_rotated.y = jumpInitialVelocity;
         }
     }
 
     // Jump
-    if (inputState.isJumpPressed) {
+    m_soundTimerJump -= elapsed;
+    if (inputState.isJumpJustPressed) {
         if (v_rotated.y < 0) {
+            if (m_soundTimerJump < 0.0f) {
+                m_soundTimerJump = 0.25f;
+                auto const jumpSound = getGame()->audio().addTemporarySound(
+                    "event:/jump-p" + std::to_string(m_playerId + 1));
+                jumpSound->play();
+            }
             b2b->ApplyForceToCenter(b2Vec2 { -m_gravityDirection.x, -m_gravityDirection.y }, true);
         }
     }
@@ -283,23 +289,25 @@ void Player::handleMovement(float const elapsed)
         v_rotated.x = -maxHorizontalVelocity;
     }
 
-    auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
-
-    m_physicsObject->setVelocity(v * 0.99);
+    auto v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
+    v = v * 0.99f;
+    m_physicsObject->setVelocity(v);
 
     ///////////// sound
     auto const l = jt::MathHelper::lengthSquared(v);
-    std::cout << l << std::endl;
-
+    if (m_playerId == 0) { }
     if (l > 50.0f) {
-        m_walkTimer -= elapsed;
+        m_soundTimerWalk -= elapsed;
     }
-    if (m_walkTimer <= 0.0f) {
+    if (m_soundTimerWalk <= 0.0f) {
         // TODO select good time
-        m_walkTimer = 0.2f;
-        auto const walkSound = getGame()->audio().addTemporarySound(
-            "event:/walking-p" + std::to_string(m_playerId + 1));
-        walkSound->play();
+        m_soundTimerWalk = 0.25f;
+
+        if (canJump()) {
+            auto const walkSound = getGame()->audio().addTemporarySound(
+                "event:/walking-p" + std::to_string(m_playerId + 1));
+            walkSound->play();
+        }
     }
 }
 

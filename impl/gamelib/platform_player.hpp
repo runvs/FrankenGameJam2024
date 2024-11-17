@@ -69,7 +69,8 @@ private:
 
     b2Fixture* m_footSensorFixture { nullptr };
 
-    float m_walkTimer { 0.0f };
+    float m_soundTimerWalk { 0.0f };
+    float m_soundTimerJump { 0.0f };
 
     bool canJump() const;
     void doCreate() override;
