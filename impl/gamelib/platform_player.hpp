@@ -67,7 +67,9 @@ private:
     float m_wantsToJumpTimer { 0.0f };
     bool m_isRespawnRequested { false };
 
-    b2Fixture* m_footSensorFixture;
+    b2Fixture* m_footSensorFixture { nullptr };
+
+    float m_walkTimer { 0.0f };
 
     bool canJump() const;
     void doCreate() override;

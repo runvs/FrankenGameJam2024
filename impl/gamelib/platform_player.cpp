@@ -1,8 +1,7 @@
 #include "platform_player.hpp"
-
-#include "conversions.hpp"
-#include "line.hpp"
+#include <conversions.hpp>
 #include <game_interface.hpp>
+#include <line.hpp>
 #include <math_helper.hpp>
 #include <user_data_entries.hpp>
 
@@ -195,11 +194,9 @@ void Player::handleMovement(float const elapsed)
 {
     auto const horizontalAcceleration = 15000.0f;
     auto const maxHorizontalVelocity = 250.0f;
-    auto const horizontalDampening = 130.0f;
 
     auto const jumpInitialVelocity = -250.0f;
     auto const maxVerticalVelocity = maxHorizontalVelocity;
-    auto const jumpVerticalAcceleration = -9500.0f;
 
     auto const jumpDeadTime = 0.3f;
     auto const preLandJumpTimeFrame = 0.1f;
@@ -286,23 +283,24 @@ void Player::handleMovement(float const elapsed)
         v_rotated.x = -maxHorizontalVelocity;
     }
 
-    // // damp horizontal movement
-    // if (!m_horizontalMovement) {
-    //     if (v_rotated.x > 0) {
-    //         v_rotated.x -= horizontalDampening * elapsed;
-    //         if (v_rotated.x < 0) {
-    //             v_rotated.x = 0;
-    //         }
-    //     } else if (v_rotated.x < 0) {
-    //         v_rotated.x += horizontalDampening * elapsed;
-    //         if (v_rotated.x > 0) {
-    //             v_rotated.x = 0;
-    //         }
-    //     }
-    // }
-
     auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
+
     m_physicsObject->setVelocity(v * 0.99);
+
+    ///////////// sound
+    auto const l = jt::MathHelper::lengthSquared(v);
+    std::cout << l << std::endl;
+
+    if (l > 50.0f) {
+        m_walkTimer -= elapsed;
+    }
+    if (m_walkTimer <= 0.0f) {
+        // TODO select good time
+        m_walkTimer = 0.2f;
+        auto const walkSound = getGame()->audio().addTemporarySound(
+            "event:/walking-p" + std::to_string(m_playerId + 1));
+        walkSound->play();
+    }
 }
 
 b2Body* Player::getB2Body() { return m_physicsObject->getB2Body(); }
