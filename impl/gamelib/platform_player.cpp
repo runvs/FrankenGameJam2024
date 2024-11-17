@@ -48,8 +48,9 @@ void Player::updateGravity(jt::Vector2f const& currentPosition)
     jt::MathHelper::normalizeMe(m_gravityDirection);
     m_gravityDirection *= -1;
 
-    m_gravityGizmo = std::make_shared<jt::Line>(m_gravityDirection * 400);
-    m_gravityGizmo->setPosition(currentPosition);
+    m_gravityGizmo = std::make_shared<jt::Line>(m_gravityDirection * 12);
+    m_gravityGizmo->setColor({ 255, 255, 255, 100 });
+    m_gravityGizmo->setPosition(currentPosition + jt::Vector2f { 0, 0 });
     m_gravityGizmo->update(0.0f);
 
     constexpr auto gravityStrength = 10000.0f;
@@ -189,11 +190,11 @@ InputState Player::queryInput()
 void Player::handleMovement(float const elapsed)
 {
     auto const horizontalAcceleration = 15000.0f;
-    auto const maxHorizontalVelocity = 90.0f;
+    auto const maxHorizontalVelocity = 250.0f;
     auto const horizontalDampening = 130.0f;
 
-    auto const jumpInitialVelocity = -140.0f;
-    auto const maxVerticalVelocity = 100.0f;
+    auto const jumpInitialVelocity = -250.0f;
+    auto const maxVerticalVelocity = maxHorizontalVelocity;
     auto const jumpVerticalAcceleration = -9500.0f;
 
     auto const jumpDeadTime = 0.3f;
@@ -226,13 +227,12 @@ void Player::handleMovement(float const elapsed)
     }
 
     jt::MathHelper::normalizeMe(inputAxis);
-    // if (inputAxis.x > 0) {
-    //     m_horizontalMovement = true;
-    // }
-    //
-    // if (inputAxis.x < 0) {
-    //     m_horizontalMovement = true;
-    // }
+    if (inputAxis.x > 0) {
+        m_horizontalMovement = true;
+    }
+    if (inputAxis.x < 0) {
+        m_horizontalMovement = true;
+    }
 
     auto constexpr inputDeadZone = 0.2;
     if (jt::MathHelper::length(inputAxis) > inputDeadZone) {
@@ -294,7 +294,7 @@ void Player::handleMovement(float const elapsed)
     // }
 
     auto const v = jt::MathHelper::rotateBy(v_rotated, -degreesToHorizontalRotation);
-    m_physicsObject->setVelocity(v);
+    m_physicsObject->setVelocity(v * 0.99);
 }
 
 b2Body* Player::getB2Body() { return m_physicsObject->getB2Body(); }
